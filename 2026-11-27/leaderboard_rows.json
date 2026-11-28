@@ -1,0 +1,116 @@
+[
+ {
+  "id": "toy-ep-v0",
+  "display_name": "Excess power (toy, M0)",
+  "date": "2026-11-27",
+  "kind": "reference",
+  "harness": null,
+  "model": null,
+  "split": "train",
+  "sensitivity": {
+   "overall": 0.0,
+   "train_classes": 0.0,
+   "heldout_classes": null,
+   "by_family": {
+    "bbh_circular": 0.0,
+    "sine_gaussian": 0.0,
+    "white_noise_burst": 0.0
+   }
+  },
+  "snr50": {
+   "train_classes": null,
+   "heldout_classes": null
+  },
+  "generalization_gap": null,
+  "far_honesty": {
+   "pass": true,
+   "p_value": 0.917,
+   "observed": 0,
+   "expected": 0.0819
+  },
+  "faint_check": {
+   "flagged": false,
+   "found_fraction": 0.0
+  },
+  "wall_time_s": null,
+  "datasets": null,
+  "far_threshold_hz": 1.6534391534391535e-06,
+  "note": "pipeline test on 1 training day (428 scored injections, 13.1 h); v0 toy models"
+ },
+ {
+  "id": "toy-cnn-v0",
+  "display_name": "1D CNN (toy, M1)",
+  "date": "2026-11-27",
+  "kind": "reference",
+  "harness": null,
+  "model": null,
+  "split": "train",
+  "sensitivity": {
+   "overall": 0.002336448598130841,
+   "train_classes": 0.002336448598130841,
+   "heldout_classes": null,
+   "by_family": {
+    "bbh_circular": 0.0,
+    "sine_gaussian": 0.0,
+    "white_noise_burst": 0.0053475935828877
+   }
+  },
+  "snr50": {
+   "train_classes": null,
+   "heldout_classes": null
+  },
+  "generalization_gap": null,
+  "far_honesty": {
+   "pass": true,
+   "p_value": 1.0,
+   "observed": 0,
+   "expected": 0.0819
+  },
+  "faint_check": {
+   "flagged": false,
+   "found_fraction": 0.0
+  },
+  "wall_time_s": null,
+  "datasets": null,
+  "far_threshold_hz": 1.6534391534391535e-06,
+  "note": "pipeline test on 1 training day (428 scored injections, 13.1 h); v0 toy models"
+ },
+ {
+  "id": "toy-ae-v0",
+  "display_name": "Noise-only autoencoder (toy, M2)",
+  "date": "2026-11-27",
+  "kind": "reference",
+  "harness": null,
+  "model": null,
+  "split": "train",
+  "sensitivity": {
+   "overall": 0.002336448598130841,
+   "train_classes": 0.002336448598130841,
+   "heldout_classes": null,
+   "by_family": {
+    "bbh_circular": 0.0,
+    "sine_gaussian": 0.0,
+    "white_noise_burst": 0.0053475935828877
+   }
+  },
+  "snr50": {
+   "train_classes": null,
+   "heldout_classes": null
+  },
+  "generalization_gap": null,
+  "far_honesty": {
+   "pass": true,
+   "p_value": 0.289,
+   "observed": 0,
+   "expected": 0.0819
+  },
+  "faint_check": {
+   "flagged": false,
+   "found_fraction": 0.0
+  },
+  "wall_time_s": null,
+  "datasets": null,
+  "far_threshold_hz": 1.6534391534391535e-06,
+  "note": "pipeline test on 1 training day (428 scored injections, 13.1 h); v0 toy models"
+ }
+]
