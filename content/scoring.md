@@ -1,4 +1,4 @@
-The full definitions are in the repository's [METRICS.md](https://github.com/hep-ex-bench/hep-ex-bench/blob/9f26b70/docs/METRICS.md). In short:
+The full definitions are in the repository's [METRICS.md](https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/docs/METRICS.md). In short:
 
 ### One measurement in one sealed world
 
