@@ -31,7 +31,7 @@ Small tasks shipped whole in the repository, as worked examples for adding a tas
 
 ### LIGO (being designed)
 
-Nothing is built yet. The draft is in the [design note](https://github.com/kyoon-mit/hep-ex-bench/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md).
+A first scorer runs on the training data; the task is not yet in the benchmark. The draft is in the [design note](https://github.com/kyoon-mit/agentic-ligo/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md).
 
 - **What the agent hands in:** for each dataset, a trigger list. It is a CSV file with one row per candidate event, giving:
   - column 1: the start GPS time, in seconds;

@@ -4,242 +4,217 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Agentic LIGO · benchmark monitor</title>
-  <meta name="description" content="Interactive monitor for the agent benchmark: scoring rules to play with, the tasks and datasets, the agents, and the published runs.">
+  <meta name="description" content="The agent benchmark at a glance: its datasets, the agents that run it, and how runs are scored, including the checks against cheating.">
   <link rel="canonical" href="https://kyoon-mit.github.io/agentic-ligo/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="monitor.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '\\[', right: '\\]', display: true}, {left: '\\(', right: '\\)', display: false}, {left: '$', right: '$', display: false}]});"></script>
 </head>
-<body class="theme-dark mon-body">
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="mon-top">
-    <a class="mon-top__back" href="https://kyoon-mit.github.io/projects/agentic-ligo/">← Agentic LIGO</a>
-    <h1 class="mon-top__title">Agentic LIGO · benchmark monitor</h1>
-    <div class="mon-top__right">
-      <span class="mon-chip" id="mon-status">no published runs</span>
-      <button type="button" class="mon-btn mon-btn--ghost" id="mon-layout-reset" title="Put every panel back in its place">Reset layout</button>
-      <time class="mon-clock" id="mon-clock" aria-label="Local time"></time>
+<body>
+<a class="skip" href="#view">Skip to content</a>
+<div class="app" id="app" data-runs="runs.json">
+
+  <header class="top">
+    <a class="brand" href="#scores" aria-label="Benchmark monitor, scores">
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__text"><b>Agentic LIGO</b><small>benchmark monitor</small></span>
+    </a>
+    <div class="top__right">
+      <span class="pill pill--quiet" id="status">no published runs</span>
+      <a class="btn btn--ghost" href="https://kyoon-mit.github.io/projects/agentic-ligo/">Project page</a>
+      <a class="btn btn--ghost btn--wide" href="https://github.com/hep-ex-bench/hep-ex-bench">Harness code</a>
     </div>
   </header>
-  <main id="main">
-<div class="mon" id="mon" data-runs="runs.json">
 
-<div class="mon-tape" aria-label="At a glance">
-  <div class="mon-tape__track" id="mon-tape">
-    <span><b>h4l</b> built</span><span><b>h4l_width</b> built</span><span><b>lep_calib</b> built</span>
-    <span><b>gauss_peak</b> toy</span><span><b>bump_model</b> toy</span><span><b>peak_calib</b> toy</span><span><b>width_toy</b> toy</span>
-    <span><b>LIGO bursts</b> being designed</span>
-    <span>physics <b>×1</b></span><span>calibration <b>×0.10</b></span><span>goodness of fit <b>×0.30</b></span><span>completeness <b>×0.10</b></span>
-    <span>truthfulness <b>×0.5</b></span><span>claims <b>×0.05</b></span><span>compute <b>×0.1</b></span>
-    <span>score <b>S = e<sup>−2Δ</sup></b></span><span>reference <b>= 100 %</b></span><span>published runs <b class="mon-nruns">0</b></span>
+  <nav class="rail" aria-label="Views">
+    <a class="rail__item" href="#scores" data-view="scores">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></svg><span>Scores</span></a>
+    <a class="rail__item" href="#datasets" data-view="datasets">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3" /></svg><span>Datasets</span></a>
+    <a class="rail__item" href="#models" data-view="models">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" /></svg><span>Models</span></a>
+    <a class="rail__item rail__item--end" href="#reference" data-view="reference">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z M18 20h2V6" /></svg><span>Reference</span></a>
+  </nav>
+
+  <main class="view" id="view" tabindex="-1">
+
+    <!-- ================================================================ SCORES -->
+    <section class="page" data-page="scores" aria-labelledby="h-scores">
+      <header class="page__head">
+        <h1 id="h-scores">Scores</h1>
+        <p>Every run is scored against an expert reference analysis that goes through the same sealed worlds. 100 % is the reference; higher is better.</p>
+      </header>
+
+      <div class="card card--raised">
+        <div class="card__head">
+          <h2>Leaderboard</h2>
+          <div class="card__tools">
+            <div class="seg" id="b-task" role="group" aria-label="Task"></div>
+            <button type="button" class="btn" id="b-open">Open a results file…</button>
+            <input type="file" id="b-file" accept=".json,application/json" hidden>
+          </div>
+        </div>
+        <p class="note" id="b-src" aria-live="polite"></p>
+        <p class="note note--bad" id="b-err" role="alert"></p>
+        <div id="b-board"></div>
+      </div>
+
+      <div class="grid grid--2">
+        <div class="card">
+          <div class="card__head"><h2>How a run gets its score</h2></div>
+          <ol class="steps">
+            <li class="step">
+              <span class="step__n">1</span>
+              <div><h3>Each measurement</h3>
+                <p>In each sealed world the agent reports a value $x$ with an uncertainty $\sigma$, compared with the injected truth $t$ and the reference's $\sigma_\mathrm{ref}$:</p>
+                <p class="formula">$\Delta = \ln\dfrac{\sigma}{\sigma_\mathrm{ref}} + \dfrac{z^2 - 1}{2}, \quad z = \dfrac{x - t}{\sigma}$</p>
+                <p class="muted">Being less precise than the reference costs; missing the truth by more than the quoted uncertainty allows costs. Quoting your real uncertainty gives the lowest expected charge.</p></div>
+            </li>
+            <li class="step">
+              <span class="step__n">2</span>
+              <div><h3>Seven checks, weighted</h3>
+                <div class="weights" id="weights"></div></div>
+            </li>
+            <li class="step">
+              <span class="step__n">3</span>
+              <div><h3>One number</h3>
+                <p class="formula">$S = e^{-2\Delta_\mathrm{total}}, \qquad \text{relative score} = S / S_\mathrm{ref}$</p>
+                <p class="muted">Its ±1σ range comes from resampling the sealed worlds 1000 times. A crashed world counts as "don't know".</p></div>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <div class="card__head"><h2>Checks against cheating</h2></div>
+          <ul class="checks">
+            <li class="check">
+              <span class="check__icon check__icon--lav" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6z" /></svg></span>
+              <div><h3>Cheating submissions</h3>
+                <p>Part of the test suite. Each must score below the honest reference, or the score has a hole.</p>
+                <ul class="tags"><li>reports a constant (every task)</li><li>always the Standard Model width (Higgs width)</li><li>generated, e.g. a result file that is a link</li></ul></div>
+            </li>
+            <li class="check">
+              <span class="check__icon check__icon--sky" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span>
+              <div><h3>Tripwire</h3>
+                <p>Flags answers that look placed rather than measured, for human review. It never changes the score.</p>
+                <ul class="tags"><li>on the truth grid</li><li>published values</li><li>one value in every world</li><li>pinned at zero signal</li><li>uncertainties far below the reference's</li></ul></div>
+            </li>
+            <li class="check">
+              <span class="check__icon check__icon--sage" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V9m6 9V5m6 13v-6" /></svg></span>
+              <div><h3>Missing background</h3>
+                <p>A model that leaves out a standard background process is flagged, also without changing the score.</p></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================ DATASETS -->
+    <section class="page" data-page="datasets" aria-labelledby="h-datasets" hidden>
+      <header class="page__head">
+        <h1 id="h-datasets">Datasets</h1>
+        <p>An agent builds its analysis on a public dataset; the frozen pipeline is then scored on sealed worlds that, with their truths, are not public.</p>
+      </header>
+      <div class="filterbar">
+        <div class="seg" id="d-filter" role="group" aria-label="Dataset kind">
+          <button type="button" data-kind="all" aria-pressed="true">All</button>
+          <button type="button" data-kind="physics" aria-pressed="false">Physics</button>
+          <button type="button" data-kind="toy" aria-pressed="false">Toy</button>
+          <button type="button" data-kind="ligo" aria-pressed="false">LIGO</button>
+        </div>
+      </div>
+      <div class="grid grid--cards" id="d-grid"></div>
+    </section>
+
+    <!-- ================================================================ MODELS -->
+    <section class="page" data-page="models" aria-labelledby="h-models" hidden>
+      <header class="page__head">
+        <h1 id="h-models">Models and agents</h1>
+        <p>Agents run through command-line coding tools with the operator's own login. The model and its reasoning effort are set for each session. This page does not list which models have been run.</p>
+      </header>
+
+      <h2 class="section-title">Harnesses</h2>
+      <div class="grid grid--cards" id="m-harness"></div>
+      <p class="muted">The run record also recognizes Vibe, which has no run script.</p>
+
+      <div class="grid grid--2">
+        <div class="card">
+          <div class="card__head"><h2>Prompt levels</h2></div>
+          <p class="muted">Each task has up to three prompts, each adding briefing to the one before. The score is the same for every level, so a difference in score measures what the extra briefing is worth. For the Higgs mass task:</p>
+          <ol class="ladder">
+            <li><b>Blind</b><span>Only the framing and what to hand in.</span></li>
+            <li><b>Baseline</b><span>Adds the physics context and the published measurement.</span></li>
+            <li><b>Guided</b><span>Adds an ordered plan, as a physicist would write it.</span></li>
+          </ol>
+        </div>
+        <div class="card">
+          <div class="card__head"><h2>Where an agent runs</h2></div>
+          <dl class="facts">
+            <div><dt>Agent session</dt><dd>Sandbox (bubblewrap) with its own empty home folder and caches; the evaluator's files hidden.</dd></div>
+            <div><dt>Time budget</dt><dd>2 hours by default; stopped when it runs out. An interrupted session can resume with the time left.</dd></div>
+            <div><dt>Evaluation</dt><dd>The frozen pipeline runs with the network blocked and the sealed truths not mounted.</dd></div>
+            <div><dt>Submission</dt><dd>At most 5 MB per file and 50 MB in total; dependencies declared, installed by the harness.</dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__head"><h2>Recorded for each session</h2></div>
+        <div class="table-wrap"><table class="table">
+          <thead><tr><th>Field</th><th>Content</th></tr></thead>
+          <tbody>
+            <tr><td>Harness, model, effort</td><td>As requested for the session.</td></tr>
+            <tr><td>Prompt, bundle, suite</td><td>The prompt given, the participant bundle, and the sealed suite the pipeline is evaluated on.</td></tr>
+            <tr><td>Budget</td><td>The session's whole time budget, in seconds.</td></tr>
+            <tr><td>Segments</td><td>For each stretch of work: start and end times, its budget, and its exit code (124 means stopped at the budget).</td></tr>
+            <tr><td>Harness version</td><td>The version of the coding tool.</td></tr>
+            <tr><td>As run</td><td>What the coding tool itself reports ran: the model, its version and the session id.</td></tr>
+            <tr><td>Refusal</td><td>Why a session was refused before it started.</td></tr>
+          </tbody>
+        </table></div>
+        <p class="muted">Wall time is the sum of the segments' durations. Tokens and cost are not recorded by the public harness. For each sealed world the evaluation records CPU time, peak memory, wall time and the kind of any failure.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================ REFERENCE -->
+    <section class="page" data-page="reference" aria-labelledby="h-reference" hidden>
+      <header class="page__head">
+        <h1 id="h-reference">Reference</h1>
+        <p>A summary of the benchmark, from the harness repository and the LIGO design draft. <a href="https://kyoon-mit.github.io/projects/agentic-ligo/">Project page</a> · <a href="https://github.com/hep-ex-bench/hep-ex-bench">Harness code</a></p>
+      </header>
+      <div class="card">
+        <div class="tabs" role="tablist" aria-label="Reference sections">
+          <button type="button" role="tab" class="tab" aria-selected="true" aria-controls="r-how" id="t-how">How it works</button>
+          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-scoring" id="t-scoring" tabindex="-1">Scoring</button>
+          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-tasks" id="t-tasks" tabindex="-1">Tasks and datasets</button>
+          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-agents" id="t-agents" tabindex="-1">Models and agents</button>
+          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-results" id="t-results" tabindex="-1">Results</button>
+        </div>
+        <div class="tabpanel prose" role="tabpanel" id="r-how" aria-labelledby="t-how"><!--content/how.md--></div>
+        <div class="tabpanel prose" role="tabpanel" id="r-scoring" aria-labelledby="t-scoring" hidden><!--content/scoring.md--></div>
+        <div class="tabpanel prose" role="tabpanel" id="r-tasks" aria-labelledby="t-tasks" hidden><!--content/tasks.md--></div>
+        <div class="tabpanel prose" role="tabpanel" id="r-agents" aria-labelledby="t-agents" hidden><!--content/agents.md--></div>
+        <div class="tabpanel prose" role="tabpanel" id="r-results" aria-labelledby="t-results" hidden><!--content/results.md--></div>
+        <div class="sources"><!--content/sources.md--></div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="drawer" id="drawer" hidden>
+    <div class="drawer__scrim" data-close></div>
+    <aside class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <button type="button" class="drawer__x btn btn--icon" data-close aria-label="Close">✕</button>
+      <div id="drawer-body"></div>
+    </aside>
   </div>
 </div>
-
-<div class="mon-grid" id="mon-grid">
-
-  <section class="mon-panel mon-w8" data-panel="board" aria-labelledby="p-board">
-    <header class="mon-panel__head"><h2 id="p-board">Leaderboard</h2></header>
-    <div class="mon-panel__body">
-      <div class="mon-filters" id="b-filters" hidden>
-        <label>Task <select id="b-task"></select></label>
-        <label>Harness <select id="b-harness"></select></label>
-        <label>Prompt <select id="b-prompt"></select></label>
-        <label>Suite <select id="b-suite"></select></label>
-        <label>Sort <select id="b-sort"><option value="score">Relative score</option><option value="date">Date</option><option value="time">Wall time</option></select></label>
-      </div>
-      <div class="mon-local">
-        <button type="button" class="mon-btn mon-btn--ghost" id="b-open">Open a results file…</button>
-        <input type="file" id="b-file" accept=".json,application/json" hidden>
-        <span class="mon-local__src" id="b-src" aria-live="polite"></span>
-        <span class="mon-local__err" id="b-err" role="alert"></span>
-      </div>
-      <div id="b-board"></div>
-      <div id="b-detail" class="mon-detail" hidden></div>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w4" data-panel="glance" aria-labelledby="p-glance">
-    <header class="mon-panel__head"><h2 id="p-glance">At a glance</h2></header>
-    <div class="mon-panel__body mon-kpis">
-      <div class="mon-kpi"><span class="mon-kpi__n">3</span><span class="mon-kpi__l">physics tasks built</span></div>
-      <div class="mon-kpi"><span class="mon-kpi__n">4</span><span class="mon-kpi__l">toy tasks built</span></div>
-      <div class="mon-kpi"><span class="mon-kpi__n">7</span><span class="mon-kpi__l">terms in the total score</span></div>
-      <div class="mon-kpi"><span class="mon-kpi__n">3</span><span class="mon-kpi__l">prompt levels</span></div>
-      <div class="mon-kpi"><span class="mon-kpi__n">2 h</span><span class="mon-kpi__l">default agent time budget</span></div>
-      <div class="mon-kpi"><span class="mon-kpi__n mon-nruns">0</span><span class="mon-kpi__l">published runs</span></div>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w6" data-panel="charge" aria-labelledby="p-charge">
-    <header class="mon-panel__head"><h2 id="p-charge">Charge for one measurement</h2></header>
-    <div class="mon-panel__body">
-      <p class="mon-lede">$\Delta = \ln(\sigma/\sigma_\mathrm{ref}) + (z^2 - 1)/2$, with pull $z = (x - t)/\sigma$. Lower is better; the reference sits at 0. Drag on the map.</p>
-      <div class="mon-split">
-        <div class="mon-controls">
-          <label class="mon-slider">Quoted $\sigma/\sigma_\mathrm{ref}$ <output id="c-sig-o">1.00</output>
-            <input type="range" id="c-sig" min="-2" max="2" step="0.01" value="0"></label>
-          <label class="mon-slider">Pull $z$ <output id="c-z-o">0.00</output>
-            <input type="range" id="c-z" min="-4" max="4" step="0.01" value="1"></label>
-          <div class="mon-readout">
-            <div><span class="mon-k">Charge Δ</span><span class="mon-v" id="c-d">0.000</span></div>
-            <div><span class="mon-k">Score $e^{-2\Delta}$</span><span class="mon-v" id="c-s">1.000</span></div>
-          </div>
-          <p class="mon-note" id="c-say"></p>
-        </div>
-        <figure class="mon-fig">
-          <canvas id="c-map" width="480" height="320" aria-label="Charge against quoted uncertainty and pull"></canvas>
-          <figcaption>Horizontal: $\sigma/\sigma_\mathrm{ref}$ from ¼ to 4 (log). Vertical: pull −4 to 4. Green beats the reference, red loses to it; the dotted curve is Δ = 0.</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w6" data-panel="honest" aria-labelledby="p-honest">
-    <header class="mon-panel__head"><h2 id="p-honest">Why honest uncertainties win</h2></header>
-    <div class="mon-panel__body">
-      <p class="mon-lede">If the real error is Gaussian with width $\sigma_\mathrm{true}$, the expected charge per world is $\ln(\sigma/\sigma_\mathrm{ref}) + \big((\sigma_\mathrm{true}/\sigma)^2 - 1\big)/2$, lowest at $\sigma = \sigma_\mathrm{true}$. With the shared-bias term over $K$ worlds, the pull part grows by $(1 + 1/K)$ and the best choice moves to $\sigma_\mathrm{true}\sqrt{1 + 1/K}$.</p>
-      <div class="mon-split">
-        <div class="mon-controls">
-          <label class="mon-slider">Real error $\sigma_\mathrm{true}/\sigma_\mathrm{ref}$ <output id="h-true-o">1.00</output>
-            <input type="range" id="h-true" min="-1" max="1" step="0.01" value="0"></label>
-          <label class="mon-slider">Quoted $\sigma/\sigma_\mathrm{ref}$ <output id="h-sig-o">0.50</output>
-            <input type="range" id="h-sig" min="-2" max="2" step="0.01" value="-1"></label>
-          <label class="mon-check"><input type="checkbox" id="h-bias"> Include the shared-bias term</label>
-          <label class="mon-slider" id="h-k-wrap" hidden>Worlds $K$ <output id="h-k-o">15</output>
-            <input type="range" id="h-k" min="2" max="60" step="1" value="15"></label>
-          <div class="mon-readout">
-            <div><span class="mon-k">Expected charge</span><span class="mon-v" id="h-d">0.000</span></div>
-            <div><span class="mon-k">Best possible</span><span class="mon-v" id="h-best">0.000</span></div>
-          </div>
-        </div>
-        <figure class="mon-fig">
-          <svg id="h-plot" viewBox="0 0 480 300" role="img" aria-label="Expected charge against quoted uncertainty"></svg>
-          <figcaption>The dot is your choice; the ring is the best choice.</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w8" data-panel="total" aria-labelledby="p-total">
-    <header class="mon-panel__head"><h2 id="p-total">Total score composer</h2></header>
-    <div class="mon-panel__body">
-      <p class="mon-lede">$\Delta_\mathrm{total} = \Delta_\mathrm{phys} + 0.10\,\Delta_\mathrm{cal} + 0.30\,\Delta_\mathrm{gof} + 0.10\,\Delta_\mathrm{syst} + 0.5\,\Delta_\mathrm{truth} + 0.05\,\Delta_\mathrm{claims} + 0.1\,\Delta_\mathrm{compute}$, $S = e^{-2\Delta_\mathrm{total}}$, for tasks where the agent hands in a statistical model. The headline number is $S$ over the reference's $S$.</p>
-      <div class="mon-split mon-split--wide">
-        <div class="mon-controls" id="t-sliders"></div>
-        <div class="mon-total">
-          <div class="mon-bars" id="t-bars" aria-label="Weighted contributions to the total charge"></div>
-          <label class="mon-slider mon-slider--small">Reference's total charge <output id="t-ref-o">0.00</output>
-            <input type="range" id="t-ref" min="-1" max="2" step="0.01" value="0"></label>
-          <div class="mon-readout mon-readout--big">
-            <div><span class="mon-k">Total charge</span><span class="mon-v" id="t-d">0.000</span></div>
-            <div><span class="mon-k">$S$</span><span class="mon-v" id="t-s">1.000</span></div>
-            <div><span class="mon-k">Relative score</span><span class="mon-v mon-v--hero" id="t-rel">100 %</span></div>
-          </div>
-          <button type="button" class="mon-btn" id="t-reset">Reset to the reference</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w4" data-panel="compute" aria-labelledby="p-compute">
-    <header class="mon-panel__head"><h2 id="p-compute">Compute charge</h2></header>
-    <div class="mon-panel__body">
-      <p class="mon-lede">Per world $d = \log_2(t/t_\mathrm{ref})$, floored at −1. Slower: the first 1.5× is free. Faster: credit from 1×, fading out as the rest of the score gets up to 0.05 worse than the reference's.</p>
-      <label class="mon-slider">Run time $t/t_\mathrm{ref}$ <output id="k-r-o">1.00</output>
-        <input type="range" id="k-r" min="-2" max="4" step="0.01" value="0"></label>
-      <label class="mon-slider">Rest worse than the reference by <output id="k-g-o">0.000</output>
-        <input type="range" id="k-g" min="0" max="0.08" step="0.001" value="0"></label>
-      <div class="mon-readout">
-        <div><span class="mon-k">$\Delta_\mathrm{compute}$</span><span class="mon-v" id="k-d">0.000</span></div>
-        <div><span class="mon-k">Speed credit kept</span><span class="mon-v" id="k-gv">100 %</span></div>
-        <div><span class="mon-k">Weighted (× 0.1)</span><span class="mon-v" id="k-w">0.000</span></div>
-      </div>
-      <figure class="mon-fig">
-        <svg id="k-plot" viewBox="0 0 480 260" role="img" aria-label="Compute charge against run time"></svg>
-        <figcaption>Same time in every world, no timeouts. Shaded: the speed credit.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w6" data-panel="bias" aria-labelledby="p-bias">
-    <header class="mon-panel__head"><h2 id="p-bias">A bias shared by every world</h2></header>
-    <div class="mon-panel__body">
-      <p class="mon-lede">The answers from all $K$ worlds are combined like independent measurements; $B = (z^{\ast 2} - 1)/(2K)$ is added once to the quantity's mean charge. A random error averages out in $z^\ast$; a repeated bias does not. Every world here quotes the reference's uncertainty.</p>
-      <div class="mon-split">
-        <div class="mon-controls">
-          <label class="mon-slider">Worlds $K$ <output id="s-k-o">15</output>
-            <input type="range" id="s-k" min="3" max="60" step="1" value="15"></label>
-          <label class="mon-slider">Shared bias (σ) <output id="s-b-o">0.50</output>
-            <input type="range" id="s-b" min="0" max="2" step="0.01" value="0.5"></label>
-          <label class="mon-slider">Extra random error (σ) <output id="s-e-o">0.00</output>
-            <input type="range" id="s-e" min="0" max="2" step="0.01" value="0"></label>
-          <button type="button" class="mon-btn" id="s-roll">Draw new worlds</button>
-          <div class="mon-readout">
-            <div><span class="mon-k">Mean charge per world</span><span class="mon-v" id="s-m">0.000</span></div>
-            <div><span class="mon-k">Combined pull $z^\ast$</span><span class="mon-v" id="s-z">0.000</span></div>
-            <div><span class="mon-k">Shared-bias term $B$</span><span class="mon-v" id="s-bt">0.000</span></div>
-            <div><span class="mon-k">Charge for the quantity</span><span class="mon-v mon-v--hero" id="s-t">0.000</span></div>
-          </div>
-        </div>
-        <figure class="mon-fig">
-          <svg id="s-plot" viewBox="0 0 480 300" role="img" aria-label="Pulls of each world and their combination"></svg>
-          <figcaption>Dots: each world's pull. Line: the combination's offset $z^\ast/\sqrt{K}$ in σ; band: the ±$1/\sqrt{K}$ chance gives it.</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w6" data-panel="ligo" aria-labelledby="p-ligo">
-    <header class="mon-panel__head"><h2 id="p-ligo">LIGO benchmark: the planned path</h2></header>
-    <div class="mon-panel__body">
-      <ol class="mon-flow" id="l-flow">
-        <li><button type="button" data-step="0"><b>Strain</b><span>O3, Hanford and Livingston, 16,384 Hz, simulated bursts added</span></button></li>
-        <li><button type="button" data-step="1"><b>Agent pipeline</b><span>written on O3a training data, run offline</span></button></li>
-        <li><button type="button" data-step="2"><b>Trigger list</b><span>CSV: start GPS, end GPS, false-alarm rate (Hz)</span></button></li>
-        <li><button type="button" data-step="3"><b>Scoring</b><span>on the sealed O3b test set</span></button></li>
-      </ol>
-      <div class="mon-flow-detail" id="l-detail" aria-live="polite"></div>
-      <ul class="mon-checks">
-        <li>Sensitivity at a fixed false-alarm rate</li>
-        <li>Honest false-alarm rates</li>
-        <li>Generalization to held-out classes</li>
-        <li>Cheating check with too-faint signals</li>
-        <li>The standard search plots</li>
-        <li class="is-later">Later: latency, probability of a real signal</li>
-      </ul>
-      <p class="mon-note">Nothing is built yet; the draft is in the <a href="https://github.com/kyoon-mit/hep-ex-bench/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>.</p>
-    </div>
-  </section>
-
-  <section class="mon-panel mon-w12" data-panel="reference" aria-labelledby="p-reference">
-    <header class="mon-panel__head"><h2 id="p-reference">Reference</h2></header>
-    <div class="mon-panel__body">
-      <div class="mon-tabs" role="tablist" aria-label="Reference sections">
-        <button type="button" role="tab" class="mon-tab" aria-selected="true" aria-controls="r-how" id="t-how">How it works</button>
-        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-scoring" id="t-scoring" tabindex="-1">Scoring</button>
-        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-tasks" id="t-tasks" tabindex="-1">Tasks and datasets</button>
-        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-agents" id="t-agents" tabindex="-1">Models and agents</button>
-        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-results" id="t-results" tabindex="-1">Results</button>
-      </div>
-      <div class="mon-tabpanel prose" role="tabpanel" id="r-how" aria-labelledby="t-how"><!--content/how.md--></div>
-      <div class="mon-tabpanel prose" role="tabpanel" id="r-scoring" aria-labelledby="t-scoring" hidden><!--content/scoring.md--></div>
-      <div class="mon-tabpanel prose" role="tabpanel" id="r-tasks" aria-labelledby="t-tasks" hidden><!--content/tasks.md--></div>
-      <div class="mon-tabpanel prose" role="tabpanel" id="r-agents" aria-labelledby="t-agents" hidden><!--content/agents.md--></div>
-      <div class="mon-tabpanel prose" role="tabpanel" id="r-results" aria-labelledby="t-results" hidden><!--content/results.md--></div>
-      <div class="mon-sources"><!--content/sources.md--></div>
-    </div>
-  </section>
-
-</div>
-</div>
-
 <script src="monitor.js"></script>
-  </main>
-  <footer class="mon-foot">Built from the <a href="https://github.com/kyoon-mit/agentic-ligo/tree/gh-pages">gh-pages branch of kyoon-mit/agentic-ligo</a>. Part of <a href="https://kyoon-mit.github.io/projects/agentic-ligo/">Agentic LIGO</a>.</footer>
 </body>
 </html>
