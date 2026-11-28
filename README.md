@@ -8,8 +8,8 @@ harness code on `main` and `ligo-benchmarks`.
 |---|---|
 | `index.html` | The page. Generated: edit `template.html` and `content/`, then rebuild. |
 | `template.html` | The page's panels; `<!--content/NAME.md-->` marks where text goes. |
-| `content/*.md` | The reference text (How it works, Scoring, Tasks and datasets, Models and agents, Results, Sources). |
-| `runs.json` | Published agent runs shown on the leaderboard. Only published results; the field list is in its `note`. |
+| `content/*.md` | The reference text (How it works, Scoring, Data, Agents, Results, Sources), written by the project session. |
+| `runs.json` | Published runs shown on the leaderboard (agents, reference searches, scorer tests). Only published results; the field list is in its `note`. |
 | `monitor.js` | The interactives, the panels and the leaderboard. |
 | `monitor.css` | Styles; colors are the tokens of kyoon-mit.github.io. |
 | `build.py` | Renders `content/*.md` into `template.html` and writes `index.html`. |

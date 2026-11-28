@@ -4,16 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Agentic LIGO · benchmark monitor</title>
-  <meta name="description" content="The agent benchmark at a glance: its datasets, the agents that run it, and how runs are scored, including the checks against cheating.">
+  <meta name="description" content="The LIGO burst-search benchmark at a glance: its data, the searches and agents that run on it, and how a search is scored, including the checks against cheating.">
   <link rel="canonical" href="https://kyoon-mit.github.io/agentic-ligo/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="monitor.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"
-    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '\\[', right: '\\]', display: true}, {left: '\\(', right: '\\)', display: false}, {left: '$', right: '$', display: false}]});"></script>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
@@ -48,18 +44,20 @@
     <section class="page" data-page="scores" aria-labelledby="h-scores">
       <header class="page__head">
         <h1 id="h-scores">Scores</h1>
-        <p>Every run is scored against an expert reference analysis that goes through the same sealed worlds. 100 % is the reference; higher is better.</p>
+        <p>Each search's trigger list is scored against the hidden answer key: how many signals it finds at a fixed false-alarm rate, and whether its false-alarm rates are honest. Sensitivity counts only for a search whose false-alarm rates are honest.</p>
       </header>
 
       <div class="card card--raised">
         <div class="card__head">
           <h2>Leaderboard</h2>
           <div class="card__tools">
-            <div class="seg" id="b-task" role="group" aria-label="Task"></div>
+            <div class="seg" id="b-kind" role="group" aria-label="Runs shown"></div>
+            <div class="seg" id="b-split" role="group" aria-label="Data split"></div>
             <button type="button" class="btn" id="b-open">Open a results file…</button>
             <input type="file" id="b-file" accept=".json,application/json" hidden>
           </div>
         </div>
+        <p class="note" id="b-thr"></p>
         <p class="note" id="b-src" aria-live="polite"></p>
         <p class="note note--bad" id="b-err" role="alert"></p>
         <div id="b-board"></div>
@@ -67,25 +65,27 @@
 
       <div class="grid grid--2">
         <div class="card">
-          <div class="card__head"><h2>How a run gets its score</h2></div>
+          <div class="card__head"><h2>How a search is scored</h2></div>
           <ol class="steps">
             <li class="step">
               <span class="step__n">1</span>
-              <div><h3>Each measurement</h3>
-                <p>In each sealed world the agent reports a value $x$ with an uncertainty $\sigma$, compared with the injected truth $t$ and the reference's $\sigma_\mathrm{ref}$:</p>
-                <p class="formula">$\Delta = \ln\dfrac{\sigma}{\sigma_\mathrm{ref}} + \dfrac{z^2 - 1}{2}, \quad z = \dfrac{x - t}{\sigma}$</p>
-                <p class="muted">Being less precise than the reference costs; missing the truth by more than the quoted uncertainty allows costs. Quoting your real uncertainty gives the lowest expected charge.</p></div>
+              <div><h3>The trigger list</h3>
+                <p>For each dataset, the frozen search writes a CSV file with one row per candidate event: start GPS time, end GPS time, and a false-alarm rate, meaning how often noise alone would produce a candidate this loud.</p></div>
             </li>
             <li class="step">
               <span class="step__n">2</span>
-              <div><h3>Seven checks, weighted</h3>
-                <div class="weights" id="weights"></div></div>
+              <div><h3>Matching</h3>
+                <p>A trigger matches an injected signal when its interval overlaps the signal in time, within 0.1 s for now. Only signals in analysable time in both detectors, with a computable signal-to-noise ratio, are scored.</p></div>
             </li>
             <li class="step">
               <span class="step__n">3</span>
-              <div><h3>One number</h3>
-                <p class="formula">$S = e^{-2\Delta_\mathrm{total}}, \qquad \text{relative score} = S / S_\mathrm{ref}$</p>
-                <p class="muted">Its ±1σ range comes from resampling the sealed worlds 1000 times. A crashed world counts as "don't know".</p></div>
+              <div><h3>Sensitivity</h3>
+                <p>Only triggers below the false-alarm-rate threshold count. The fraction of signals found is reported per waveform, against amplitude and against signal-to-noise ratio. For testing the threshold is 1 per week; the final one is not chosen yet (<a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-toy-searches/">27 November update</a>).</p></div>
+            </li>
+            <li class="step">
+              <span class="step__n">4</span>
+              <div><h3>Held-out classes</h3>
+                <p>The test set adds five signal classes the agent never sees in training. They are reported separately, and the gap to the training classes measures how well a search finds signals it was never shown.</p></div>
             </li>
           </ol>
         </div>
@@ -95,22 +95,22 @@
           <ul class="checks">
             <li class="check">
               <span class="check__icon check__icon--lav" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6z" /></svg></span>
-              <div><h3>Cheating submissions</h3>
-                <p>Part of the test suite. Each must score below the honest reference, or the score has a hole.</p>
-                <ul class="tags"><li>reports a constant (every task)</li><li>always the Standard Model width (Higgs width)</li><li>generated, e.g. a result file that is a link</li></ul></div>
+              <div><h3>Honest false-alarm rates</h3>
+                <p>The search also runs on noise-only data from the same half of the run. The number of triggers below each rate must agree with what the claimed rates predict; many more means the rates are dishonest.</p>
+                <ul class="tags"><li>expected = rate × analysed time</li><li>background by time slides allowed</li></ul></div>
             </li>
             <li class="check">
-              <span class="check__icon check__icon--sky" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg></span>
-              <div><h3>Tripwire</h3>
-                <p>Flags answers that look placed rather than measured, for human review. It never changes the score.</p>
-                <ul class="tags"><li>on the truth grid</li><li>published values</li><li>one value in every world</li><li>pinned at zero signal</li><li>uncertainties far below the reference's</li></ul></div>
+              <span class="check__icon check__icon--sky" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12h3l2-6 3 12 3-9 2 5 2-2h5" /></svg></span>
+              <div><h3>Too-faint signals</h3>
+                <p>Some injected signals are too faint for any real search to see (signal-to-noise ratio below 2 in the two detectors combined). A search that finds many of them has seen the answer and is flagged. A search that reads the answer key passes the honesty check; only this check catches it.</p></div>
             </li>
             <li class="check">
-              <span class="check__icon check__icon--sage" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V9m6 9V5m6 13v-6" /></svg></span>
-              <div><h3>Missing background</h3>
-                <p>A model that leaves out a standard background process is flagged, also without changing the score.</p></div>
+              <span class="check__icon check__icon--sage" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg></span>
+              <div><h3>Sealed and offline</h3>
+                <p>The frozen search runs with no network: O3 strain is public, so subtracting it from the data would reveal every injection. The test set's GPS times are shifted by a secret amount.</p></div>
             </li>
           </ul>
+          <p class="muted" style="margin-top:.8rem">The scorer itself is tested with fake trigger lists: one that reports nothing, triggers every second with honest and with dishonest rates, random triggers with dishonest rates, and one that reads the answer key. Each behaves as designed (<a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-first-scoring-run/">27 November update</a>).</p>
         </div>
       </div>
     </section>
@@ -119,25 +119,46 @@
     <section class="page" data-page="datasets" aria-labelledby="h-datasets" hidden>
       <header class="page__head">
         <h1 id="h-datasets">Datasets</h1>
-        <p>An agent builds its analysis on a public dataset; the frozen pipeline is then scored on sealed worlds that, with their truths, are not public.</p>
+        <p>Real LIGO strain from the third observing run (O3), with simulated short bursts added. The agent builds its search on documented training data; the frozen search then runs on a sealed test set whose signals are hidden.</p>
       </header>
       <div class="filterbar">
-        <div class="seg" id="d-filter" role="group" aria-label="Dataset kind">
+        <div class="seg" id="d-filter" role="group" aria-label="Show">
           <button type="button" data-kind="all" aria-pressed="true">All</button>
-          <button type="button" data-kind="physics" aria-pressed="false">Physics</button>
-          <button type="button" data-kind="toy" aria-pressed="false">Toy</button>
-          <button type="button" data-kind="ligo" aria-pressed="false">LIGO</button>
+          <button type="button" data-kind="data" aria-pressed="false">Data</button>
+          <button type="button" data-kind="signals" aria-pressed="false">Signals</button>
         </div>
       </div>
       <div class="grid grid--cards" id="d-grid"></div>
+      <div class="card">
+        <div class="card__head"><h2>Across all sets</h2></div>
+        <dl class="facts">
+          <div><dt>Detectors</dt><dd>Hanford and Livingston, at 16,384 Hz.</dd></div>
+          <div><dt>Signals</dt><dd>Simulated short bursts, under 10 s, added to the strain.</dd></div>
+          <div><dt>Noise conditions</dt><dd>The injection and noise sets alternate in blocks of about one day from the same run. They see the same noise conditions but share no data.</dd></div>
+          <div><dt>No real events</dt><dd>One detector's data is shifted in time against the other's, so only the injected signals line up between the detectors.</dd></div>
+          <div><dt>Hosting</dt><dd>Not on Hugging Face; where the benchmark will host the data is not decided yet.</dd></div>
+        </dl>
+      </div>
     </section>
 
     <!-- ================================================================ MODELS -->
     <section class="page" data-page="models" aria-labelledby="h-models" hidden>
       <header class="page__head">
-        <h1 id="h-models">Models and agents</h1>
-        <p>Agents run through command-line coding tools with the operator's own login. The model and its reasoning effort are set for each session. This page does not list which models have been run.</p>
+        <h1 id="h-models">Searches and agents</h1>
+        <p>Simple, honest reference searches will set the bar; agents build their own searches through command-line coding tools. No agent has been run on the LIGO benchmark yet.</p>
       </header>
+
+      <h2 class="section-title">Reference searches</h2>
+      <div class="grid grid--cards" id="m-search"></div>
+      <div class="card">
+        <div class="card__head"><h2>Where they stand</h2></div>
+        <dl class="facts">
+          <div><dt>Purpose</dt><dd>Deliberately crude toys, frozen to test the pipeline. They are not baselines; a real baseline is still to come.</dd></div>
+          <div><dt>First test</dt><dd>On one day of training data all three ran end to end: detector coincidence, a background from about a year of time slides, and scoring. Their false-alarm rates were honest on held-out noise, and their sensitivity is near zero, as expected for toys.</dd></div>
+          <div><dt>Full run</dt><dd>Over the whole dataset, on a single GPU: started 27 November 2026, expected to take about a day.</dd></div>
+        </dl>
+        <p class="muted" style="margin-top:.6rem">From the <a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-toy-searches/">27 November update</a>.</p>
+      </div>
 
       <h2 class="section-title">Harnesses</h2>
       <div class="grid grid--cards" id="m-harness"></div>
@@ -145,21 +166,19 @@
 
       <div class="grid grid--2">
         <div class="card">
-          <div class="card__head"><h2>Prompt levels</h2></div>
-          <p class="muted">Each task has up to three prompts, each adding briefing to the one before. The score is the same for every level, so a difference in score measures what the extra briefing is worth. For the Higgs mass task:</p>
-          <ol class="ladder">
-            <li><b>Blind</b><span>Only the framing and what to hand in.</span></li>
-            <li><b>Baseline</b><span>Adds the physics context and the published measurement.</span></li>
-            <li><b>Guided</b><span>Adds an ordered plan, as a physicist would write it.</span></li>
-          </ol>
-        </div>
-        <div class="card">
           <div class="card__head"><h2>Where an agent runs</h2></div>
           <dl class="facts">
-            <div><dt>Agent session</dt><dd>Sandbox (bubblewrap) with its own empty home folder and caches; the evaluator's files hidden.</dd></div>
-            <div><dt>Time budget</dt><dd>2 hours by default; stopped when it runs out. An interrupted session can resume with the time left.</dd></div>
-            <div><dt>Evaluation</dt><dd>The frozen pipeline runs with the network blocked and the sealed truths not mounted.</dd></div>
-            <div><dt>Submission</dt><dd>At most 5 MB per file and 50 MB in total; dependencies declared, installed by the harness.</dd></div>
+            <div><dt>Agent session</dt><dd>A sandbox (bubblewrap) with its own empty home folder and caches, and with the evaluator's files hidden.</dd></div>
+            <div><dt>Time budget</dt><dd>2 hours by default in the harness; stopped when it runs out. An interrupted session can resume with the time it has left.</dd></div>
+            <div><dt>Frozen search</dt><dd>Runs in a sandbox with the network blocked and the sealed answer key not mounted.</dd></div>
+          </dl>
+        </div>
+        <div class="card">
+          <div class="card__head"><h2>Per session</h2></div>
+          <dl class="facts">
+            <div><dt>Model</dt><dd>The model and its reasoning effort are set for each session.</dd></div>
+            <div><dt>Login</dt><dd>Each coding tool runs with the operator's own login.</dd></div>
+            <div><dt>Prompts</dt><dd>The LIGO prompts are not written yet.</dd></div>
           </dl>
         </div>
       </div>
@@ -170,15 +189,15 @@
           <thead><tr><th>Field</th><th>Content</th></tr></thead>
           <tbody>
             <tr><td>Harness, model, effort</td><td>As requested for the session.</td></tr>
-            <tr><td>Prompt, bundle, suite</td><td>The prompt given, the participant bundle, and the sealed suite the pipeline is evaluated on.</td></tr>
+            <tr><td>Prompt, bundle, suite</td><td>The prompt given, the participant bundle, and the sealed suite the search is evaluated on.</td></tr>
             <tr><td>Budget</td><td>The session's whole time budget, in seconds.</td></tr>
             <tr><td>Segments</td><td>For each stretch of work: start and end times, its budget, and its exit code (124 means stopped at the budget).</td></tr>
             <tr><td>Harness version</td><td>The version of the coding tool.</td></tr>
             <tr><td>As run</td><td>What the coding tool itself reports ran: the model, its version and the session id.</td></tr>
-            <tr><td>Refusal</td><td>Why a session was refused before it started.</td></tr>
+            <tr><td>Refusal</td><td>Why a session was refused before it started, for example a login that would expire before the budget ends.</td></tr>
           </tbody>
         </table></div>
-        <p class="muted">Wall time is the sum of the segments' durations. Tokens and cost are not recorded by the public harness. For each sealed world the evaluation records CPU time, peak memory, wall time and the kind of any failure.</p>
+        <p class="muted">Wall time is the sum of the segments' durations, with gaps between them not counted. Tokens and cost are not recorded.</p>
       </div>
     </section>
 
@@ -186,269 +205,161 @@
     <section class="page" data-page="reference" aria-labelledby="h-reference" hidden>
       <header class="page__head">
         <h1 id="h-reference">Reference</h1>
-        <p>A summary of the benchmark, from the harness repository and the LIGO design draft. <a href="https://kyoon-mit.github.io/projects/agentic-ligo/">Project page</a> · <a href="https://github.com/kyoon-mit/agentic-ligo/tree/ligo-benchmarks">Harness code</a></p>
+        <p>A summary of the LIGO benchmark, from the design draft, the project updates and the harness repository. <a href="https://kyoon-mit.github.io/projects/agentic-ligo/">Project page</a> · <a href="https://github.com/kyoon-mit/agentic-ligo/tree/ligo-benchmarks">Harness code</a></p>
       </header>
       <div class="card">
         <div class="tabs" role="tablist" aria-label="Reference sections">
           <button type="button" role="tab" class="tab" aria-selected="true" aria-controls="r-how" id="t-how">How it works</button>
           <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-scoring" id="t-scoring" tabindex="-1">Scoring</button>
-          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-tasks" id="t-tasks" tabindex="-1">Tasks and datasets</button>
-          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-agents" id="t-agents" tabindex="-1">Models and agents</button>
+          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-tasks" id="t-tasks" tabindex="-1">Data</button>
+          <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-agents" id="t-agents" tabindex="-1">Agents</button>
           <button type="button" role="tab" class="tab" aria-selected="false" aria-controls="r-results" id="t-results" tabindex="-1">Results</button>
         </div>
-        <div class="tabpanel prose" role="tabpanel" id="r-how" aria-labelledby="t-how"><ul>
-<li>An AI agent gets a public dataset and writes an analysis pipeline: a folder with a script, <code>run.sh &lt;dataset&gt; &lt;out&gt;</code>, that writes its answers to a file, <code>RESULT.json</code>.</li>
-<li>The pipeline is then frozen and run, unchanged and offline, on many sealed datasets (&quot;sealed worlds&quot;). Each sealed world is generated with injected signals, and with detector settings varied within realistic uncertainties.</li>
-<li>Every answer is compared with the injected truth. The run is scored relative to an expert reference analysis, which goes through exactly the same path.</li>
-<li>The sealed worlds and their truths are not public. The code is: <a href="https://github.com/hep-ex-bench/hep-ex-bench">hep-ex-bench/hep-ex-bench</a> (Apache-2.0), with the public datasets on <a href="https://huggingface.co/hep-ex-bench">Hugging Face</a> (CC BY 4.0).</li>
+        <div class="tabpanel prose" role="tabpanel" id="r-how" aria-labelledby="t-how"><h2>How it works</h2>
+<ul>
+<li>An AI agent builds a gravitational-wave burst search on documented training data, where it can see where the signals are.</li>
+<li>Its search is a folder with a script, <code>run.sh &lt;dataset&gt; &lt;out&gt;</code>, that writes a trigger list. The search is then frozen and run, unchanged and offline, on a sealed test set whose signals are hidden.</li>
+<li>Each trigger list is scored against the hidden answer key:
+<ul>
+<li>how many signals the search finds at a fixed false-alarm rate;</li>
+<li>whether its false-alarm rates are honest;</li>
+<li>how well it finds signal classes it never saw in training;</li>
+<li>whether it found signals that no real search could see.</li>
+</ul>
+</li>
+<li>The design follows the group's high energy physics benchmark, <a href="https://github.com/hep-ex-bench/hep-ex-bench">HEP-Ex-Bench</a>, and runs in the same harness.</li>
+<li><strong>Status:</strong> a first scorer runs on the training data. The task is not yet in the benchmark, and no agent has been run on it.</li>
 </ul>
 </div>
-        <div class="tabpanel prose" role="tabpanel" id="r-scoring" aria-labelledby="t-scoring" hidden><p>The full definitions are in the repository's <a href="https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/docs/METRICS.md">METRICS.md</a>. In short:</p>
-<h3>One measurement in one sealed world</h3>
-<p>For each quantity the agent measures (for example the Higgs boson mass) in each sealed world, the agent reports a value $x$ with an uncertainty $\sigma$. The injected truth is $t$, the pull is $z = (x - t)/\sigma$, and the reference analysis quoted an uncertainty $\sigma_\mathrm{ref}$ in the same world. The charge is</p>
-<p>$$\Delta = \ln\frac{\sigma}{\sigma_\mathrm{ref}} + \frac{z^2 - 1}{2}.$$</p>
-<ul>
-<li>The first part charges for being less precise than the reference, and gives credit for being more precise.</li>
-<li>The second part charges for missing the truth by more than the quoted uncertainty allows.</li>
-<li>The reference, with honest uncertainties, sits at 0 on average.</li>
-<li>This is the logarithmic score: quoting your true uncertainty gives the lowest expected charge, and shrinking or padding it costs.</li>
-</ul>
-<h3>Across the sealed worlds</h3>
-<ul>
-<li><strong>A bias shared by every world.</strong> The answers from all worlds are combined like independent measurements (weighted by $1/\sigma^2$), and the combination's squared pull beyond what chance gives is added to the charge. A bias that repeats in every world therefore costs about twice what a random error of the same size costs.</li>
-<li><strong>A crash.</strong> A world where the pipeline fails is charged as &quot;don't know&quot;: the charge of the task's no-answer guess, never less than 0. Skipping hard worlds never beats the reference.</li>
-</ul>
-<h3>The total score</h3>
-<p>$$\Delta_\mathrm{total} = \Delta_\mathrm{phys} + 0.10\,\Delta_\mathrm{cal} + 0.30\,\Delta_\mathrm{gof} + 0.10\,\Delta_\mathrm{syst} + 0.5\,\Delta_\mathrm{truth} + 0.05\,\Delta_\mathrm{claims} + 0.1\,\Delta_\mathrm{compute}$$</p>
-<p>$$S = e^{-2\,\Delta_\mathrm{total}}$$</p>
-<div>
+        <div class="tabpanel prose" role="tabpanel" id="r-scoring" aria-labelledby="t-scoring" hidden><h2>How a search is scored</h2>
+<h3>What the search hands in</h3>
+<p>For each dataset, a CSV file with one row per candidate event:</p>
 <table>
 <thead>
 <tr>
-<th>Term</th>
-<th>Weight</th>
-<th>What it checks</th>
+<th>Column</th>
+<th>Content</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Physics</td>
 <td>1</td>
-<td>The measured quantities, each charged as above; the total uses the average of their scores, so a run that measures one of n quantities keeps at least 1/n of that quantity's score.</td>
+<td>Start GPS time, in seconds</td>
 </tr>
 <tr>
-<td>Calibration</td>
-<td>0.10</td>
-<td>Detector calibrations the agent measures and logs (for example a shift of the lepton momentum scale), against the values injected into each world.</td>
+<td>2</td>
+<td>End GPS time, in seconds</td>
 </tr>
 <tr>
-<td>Goodness of fit</td>
-<td>0.30</td>
-<td>Whether the agent's statistical model fits the data, over all worlds together (the per-world p-values combined by Fisher's method; no charge while the combined p-value is at least 1 %).</td>
-</tr>
-<tr>
-<td>Completeness</td>
-<td>0.10</td>
-<td>Whether the model includes the standard sources of uncertainty, as real effects rather than placeholders.</td>
-</tr>
-<tr>
-<td>Truthfulness</td>
-<td>0.5</td>
-<td>Whether the reported numbers match what the evaluator gets by refitting the agent's own model.</td>
-</tr>
-<tr>
-<td>Claims</td>
-<td>0.05</td>
-<td>Whether the side claims (expected and observed significance, a discovery claim, the split into statistical and systematic uncertainty, the fit quality) agree with that refit.</td>
-</tr>
-<tr>
-<td>Compute</td>
-<td>0.1</td>
-<td>Run time against the reference: free up to 1.5 times the reference's time, then +1 per doubling. A faster run can earn down to −1, but only when the rest of its score is as good as the reference's.</td>
+<td>3</td>
+<td>False-alarm rate, in Hz: how often noise alone would produce a candidate this loud</td>
 </tr>
 </tbody>
 </table>
-</div>
+<p>Sky position (right ascension and declination) may be added later as two more columns.</p>
+<h3>Matching triggers to signals</h3>
 <ul>
-<li>This total is for tasks where the agent hands in a statistical model, which the evaluator refits. The lepton calibration task uses its own total: physics, completeness, a check of the corrected Z boson peak (weight 0.5) and compute.</li>
-<li><strong>The headline number</strong> is the relative score: $S$ divided by the reference's $S$ on the same worlds, as a percentage. 100 % is the reference; above 100 % is better than the reference. Its ±1σ band comes from resampling the sealed worlds 1000 times.</li>
+<li>A trigger matches an injected signal when its start-to-end interval overlaps the signal in time, within a tolerance. The tolerance is 0.1 s for now; the final value will be fixed before any results are seen.</li>
+<li>Only signals that lie in analysable time in both detectors, with a computable signal-to-noise ratio, are scored.</li>
+<li>A trigger that matches a signal that is not scored is dropped. It counts neither as found nor as a false alarm.</li>
+<li>Waveforms with known defects in the injected data are left out of every metric.</li>
 </ul>
-<h3>Checks against cheating</h3>
+<h3>Sensitivity at a fixed false-alarm rate</h3>
 <ul>
-<li>
-<p><strong>Cheating submissions.</strong> Submissions that cheat on purpose are part of the test suite. Each must score below the honest reference, or the score has a hole. Every task ships one that reports a constant, and the Higgs width task also ships one that always reports the Standard Model width. Others are generated automatically, for example an honest answer whose result file is a link the grader must not follow.</p>
-</li>
-<li>
-<p><strong>Tripwire.</strong> It flags answers that look placed rather than measured:</p>
-<ul>
-<li>values sitting on the points the truths are drawn from;</li>
-<li>published values;</li>
-<li>one value repeated across worlds;</li>
-<li>an answer pinned at zero signal;</li>
-<li>uncertainties far smaller than the reference's.</li>
+<li>Only triggers with a false-alarm rate below the threshold count. A signal is found if such a trigger matches it.</li>
+<li>The fraction found is reported per waveform, against the signal's amplitude (hrss) and against its signal-to-noise ratio in the two detectors combined.</li>
+<li>Classes are compared at a fixed signal-to-noise ratio, since some were injected louder than others.</li>
+<li>For testing, the main threshold is 1 per week. The final threshold is not chosen yet.</li>
 </ul>
-<p>It flags a run for human review and never changes the score.</p>
-</li>
-<li>
-<p><strong>Missing background.</strong> A model that leaves out a standard background process is flagged, also without changing the score.</p>
-</li>
-</ul>
-</div>
-        <div class="tabpanel prose" role="tabpanel" id="r-tasks" aria-labelledby="t-tasks" hidden><h3>High energy physics (built)</h3>
-<div>
-<table>
-<thead>
-<tr>
-<th>Task</th>
-<th>What the agent measures</th>
-<th>What it hands in</th>
-<th>Data</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>HiggsLepMass (<code>h4l</code>)</td>
-<td>The Higgs boson signal strength and mass from H→ZZ*→4ℓ, detector calibrations included</td>
-<td>Values with uncertainties, and a binned likelihood model</td>
-<td>CMS Open Data simulation, 2016 conditions</td>
-</tr>
-<tr>
-<td>HiggsWidth (<code>h4l_width</code>)</td>
-<td>The Higgs width relative to the Standard Model, and the on-shell signal strength, from H→ZZ→4ℓ</td>
-<td>Intervals, and a binned likelihood model whose rates scale with them</td>
-<td>CMS Open Data simulation and private samples through the same detector simulation, 2016 conditions</td>
-</tr>
-<tr>
-<td>LepCalib (<code>lep_calib</code>)</td>
-<td>Lepton calibrations from Z→ℓℓ</td>
-<td>Corrections as functions, in the correctionlib format</td>
-<td>CMS Open Data derived simulation, 2016 conditions</td>
-</tr>
-</tbody>
-</table>
-</div>
+<h3>Honest false-alarm rates</h3>
 <ul>
-<li><strong>Data format:</strong> reconstructed events in the NanoAOD format, slimmed to muons, electrons, photons from final-state radiation, trigger objects and trigger decisions.</li>
-<li><strong>Public datasets:</strong> <code>hep-ex-bench/HiggsLepMass</code>, <code>hep-ex-bench/HiggsWidth</code> and <code>hep-ex-bench/LepCalib</code> on Hugging Face. The repository's instructions use revision <code>v0.2</code>.</li>
-<li><strong>Sealed worlds:</strong> for the two Higgs tasks, each sealed world carries about twice the integrated luminosity of the public dataset. For the lepton calibration task, every world carries 10 fb⁻¹.</li>
+<li>The search also runs on noise-only data from the same half of the run.</li>
+<li>On that data, the number of triggers below each false-alarm rate must agree with what the claimed rates predict (rate × analysed time). Many more than predicted means the claimed rates are dishonest.</li>
+<li>A search may estimate its background by time slides: shifting one detector's data against the other's, so that any coincidence comes from noise alone.</li>
+<li>Sensitivity counts only for a search whose false-alarm rates are honest.</li>
 </ul>
-<h3>Toy tasks (built)</h3>
-<p>Small tasks shipped whole in the repository, as worked examples for adding a task.</p>
-<div>
-<table>
-<thead>
-<tr>
-<th>Toy</th>
-<th>What the agent measures</th>
-<th>What it hands in</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>gauss_peak</code></td>
-<td>A Gaussian peak</td>
-<td>Values with uncertainties</td>
-</tr>
-<tr>
-<td><code>bump_model</code></td>
-<td>A resonance on a falling background</td>
-<td>Values, and a binned likelihood model</td>
-</tr>
-<tr>
-<td><code>peak_calib</code></td>
-<td>A muon momentum scale, resolution and efficiency from a Z boson peak</td>
-<td>Corrections</td>
-</tr>
-<tr>
-<td><code>width_toy</code></td>
-<td>A width ratio from an off-shell mass spectrum</td>
-<td>Intervals, and a binned likelihood model</td>
-</tr>
-</tbody>
-</table>
-</div>
-<h3>LIGO (being designed)</h3>
-<p>A first scorer runs on the training data; the task is not yet in the benchmark. The draft is in the <a href="https://github.com/kyoon-mit/agentic-ligo/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>.</p>
+<h3>Generalization</h3>
 <ul>
-<li>
-<p><strong>What the agent hands in:</strong> for each dataset, a trigger list. It is a CSV file with one row per candidate event, giving:</p>
-<ul>
-<li>column 1: the start GPS time, in seconds;</li>
-<li>column 2: the end GPS time, in seconds;</li>
-<li>column 3: the false-alarm rate, in Hz.</li>
+<li>The training signal classes and the held-out classes are reported separately.</li>
+<li>The gap between the two measures how well the search finds signals it was never shown.</li>
 </ul>
-<p>Sky position (right ascension and declination) may be added later.</p>
-</li>
-<li>
-<p><strong>Planned benchmarks:</strong></p>
+<h3>Too-faint signals</h3>
 <ul>
-<li><strong>Sensitivity at a fixed false-alarm rate:</strong> the fraction of injected signals found, per waveform, against signal amplitude and signal-to-noise ratio. Classes are compared at a fixed signal-to-noise ratio, since some were injected louder than others.</li>
-<li><strong>Honest false-alarm rates:</strong> checked on the noise-only data.</li>
-<li><strong>Generalization:</strong> the gap between the signal classes seen in training and the classes held out from it.</li>
-<li><strong>Cheating check:</strong> some injected signals are too faint for any real search. A search that finds many of them has most likely subtracted the public LIGO data.</li>
-<li><strong>The standard plots of gravitational-wave searches:</strong>
+<li>Some injected signals are too faint for any real search to see (signal-to-noise ratio below 2 in the two detectors combined).</li>
+<li>A search that finds many of them has seen the answer, for example by subtracting the public LIGO data, and is flagged.</li>
+<li>A search that reads the answer key passes the honesty check, because it reports nothing on noise. Only this check catches it.</li>
+</ul>
+<h3>Testing the scorer</h3>
+<p>The scorer is tested with fake trigger lists:</p>
 <ul>
-<li>injections found or missed;</li>
-<li>the fraction found against signal strength;</li>
-<li>the number of candidates above each false-alarm rate, compared with what noise alone gives.</li>
+<li>one that reports nothing;</li>
+<li>triggers every second, with honest rates and with dishonest ones;</li>
+<li>random triggers with dishonest rates;</li>
+<li>one that reads the answer key.</li>
 </ul>
-</li>
-<li><strong>Later:</strong> latency, and the probability that a candidate is a real signal.</li>
-</ul>
-</li>
-<li>
-<p><strong>The data:</strong></p>
+<p>Each behaves as designed: the dishonest lists fail the honesty check, and the list that reads the answer key is caught by the too-faint check (<a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-first-scoring-run/">27 November update</a>).</p>
+<h3>Not decided yet</h3>
 <ul>
-<li>real LIGO strain from the third observing run (O3), from the Hanford and Livingston detectors, at 16,384 Hz, with simulated short bursts (under 10 s) added;</li>
-<li>training data from the first half of the run (O3a): one set with injected signals and one with noise only;</li>
-<li>a sealed test set from the second half (O3b), with the same two parts;</li>
-<li>training signals: 39 waveforms (19 sine-Gaussians, 16 white-noise bursts, 4 binary black hole mergers on circular orbits);</li>
-<li>test signals: the same 39 plus five classes the agent never sees in training;</li>
-<li>not on Hugging Face; where the benchmark will host it is not decided yet.</li>
-</ul>
-</li>
-<li>
-<p><strong>Offline:</strong> agents run with no network. O3 strain is public, so subtracting it from the data would reveal every injection.</p>
-</li>
-<li>
-<p><strong>A toy task comes first:</strong> simulated noise with simple injected bursts, to test the scoring and the cheating submissions before the real data.</p>
-</li>
+<li>the final false-alarm-rate threshold and the final matching tolerance (1 per week and 0.1 s for testing);</li>
+<li>whether the search also hands in the list of time it analysed;</li>
+<li>a single combined score, and how runs are ranked;</li>
+<li>how the test set is cut into sealed pieces;</li>
+<li>later: the probability that a candidate is a real signal, and latency.</li>
 </ul>
 </div>
-        <div class="tabpanel prose" role="tabpanel" id="r-agents" aria-labelledby="t-agents" hidden><ul>
-<li>
-<p><strong>Harnesses:</strong> agents run through command-line coding tools with the operator's own login: Claude Code, Codex and opencode. The run record also handles Vibe.</p>
-</li>
-<li>
-<p><strong>Models:</strong> the model and its reasoning effort are set for each session. This page does not list which models have been run.</p>
-</li>
-<li>
-<p><strong>Prompt levels:</strong> each task has up to three prompts, each adding briefing to the one before. For the Higgs mass task:</p>
+        <div class="tabpanel prose" role="tabpanel" id="r-tasks" aria-labelledby="t-tasks" hidden><h2>The data</h2>
 <ul>
-<li>a blind prompt, with only the framing and what to hand in;</li>
-<li>the baseline, which adds the physics context and the published measurement;</li>
-<li>a guided prompt, which adds an ordered plan, as a physicist would write it.</li>
+<li><strong>Detectors:</strong> real LIGO strain from the third observing run (O3), from Hanford and Livingston, at 16,384 Hz.</li>
+<li><strong>Signals:</strong> simulated short bursts (under 10 s) added to the strain.</li>
+<li><strong>Training data:</strong> from the first half of the run (O3a). One set has injected signals and one has noise only. Where every signal is, and what it is, is documented.</li>
+<li><strong>Test data, sealed:</strong> from the second half (O3b), with the same two parts. The signals are hidden.</li>
+<li><strong>Noise conditions:</strong> the injection and noise sets alternate in blocks of about one day from the same run. They see the same noise conditions but share no data.</li>
+<li><strong>No real events:</strong> one detector's data is shifted in time against the other's, so only the injected signals line up between the detectors.</li>
+<li><strong>Training signals, 39 waveforms:</strong>
+<ul>
+<li>19 sine-Gaussians: a sine wave under a bell-shaped envelope;</li>
+<li>16 white-noise bursts: a short burst of random noise in a frequency band;</li>
+<li>4 binary black hole mergers on circular orbits.</li>
 </ul>
-<p>The score is the same for every level, so a difference in score measures what the extra briefing is worth.</p>
 </li>
-<li>
-<p><strong>The agent's session:</strong></p>
+<li><strong>Test signals:</strong> the same 39, plus five classes the agent never sees in training.</li>
+<li><strong>Against gaming:</strong>
+<ul>
+<li>the test set's GPS times are shifted by a secret amount;</li>
+<li>the search runs with no network. O3 strain is public, so subtracting it from the data would reveal every injection.</li>
+</ul>
+</li>
+<li><strong>Hosting:</strong> the data is not on Hugging Face, and where the benchmark will host it is not decided yet.</li>
+</ul>
+<h2>Reference searches</h2>
+<ul>
+<li>Simple, honest searches will set the bar for the agents.</li>
+<li>Three deliberately crude toy searches are frozen to test the pipeline: an excess-power search, a small one-dimensional convolutional network on whitened 1 s windows, and an autoencoder trained on noise only.</li>
+<li>On one day of training data all three ran end to end, with background from time slides. Their false-alarm rates were honest on held-out noise, and they found almost nothing, as expected for toys. They are not baselines; a real baseline is still to come.</li>
+</ul>
+<p>Draft design: <a href="https://github.com/kyoon-mit/agentic-ligo/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>.</p>
+</div>
+        <div class="tabpanel prose" role="tabpanel" id="r-agents" aria-labelledby="t-agents" hidden><h2>Agents</h2>
+<p>LIGO agents will run through the same harness as HEP-Ex-Bench.</p>
+<ul>
+<li><strong>Coding tools:</strong>
+<ul>
+<li>Claude Code, Codex and opencode each have a run script, and each runs with the operator's own login;</li>
+<li>the run record also recognizes Vibe.</li>
+</ul>
+</li>
+<li><strong>Models:</strong> the model and its reasoning effort are set for each session.</li>
+<li><strong>Prompts:</strong> the LIGO prompts are not written yet.</li>
+<li><strong>The session:</strong>
 <ul>
 <li>It runs in a sandbox (bubblewrap) with its own empty home folder and caches, and with the evaluator's files hidden.</li>
-<li>It has a time budget, 2 hours by default, and is stopped when the budget runs out.</li>
+<li>It has a time budget, 2 hours by default in the harness, and is stopped when the budget runs out.</li>
 <li>An interrupted session can resume with the time it has left.</li>
 </ul>
 </li>
-<li>
-<p><strong>The evaluation of the frozen pipeline:</strong></p>
-<ul>
-<li>It runs in a sandbox with the network blocked and the sealed truths not mounted.</li>
-<li>A submission may hold at most 5 MB per file and 50 MB in total, with no bundled installed packages; dependencies are declared and installed by the harness.</li>
+<li><strong>The frozen search</strong> runs in a sandbox with the network blocked and the sealed answer key not mounted.</li>
 </ul>
-</li>
-</ul>
-<h3>What is recorded for each agent session</h3>
-<div>
+<h3>What is recorded for each session</h3>
 <table>
 <thead>
 <tr>
@@ -463,7 +374,7 @@
 </tr>
 <tr>
 <td>Prompt, bundle, suite</td>
-<td>The prompt given, the participant bundle, and the sealed suite the pipeline is evaluated on.</td>
+<td>The prompt given, the participant bundle, and the sealed suite the search is evaluated on.</td>
 </tr>
 <tr>
 <td>Budget</td>
@@ -479,7 +390,7 @@
 </tr>
 <tr>
 <td>As run</td>
-<td>What the coding tool itself reports ran: the model, its version and the session id. Claude Code adds its permission mode; Codex adds its reasoning effort, approval and sandbox settings.</td>
+<td>What the coding tool itself reports ran: the model, its version and the session id.</td>
 </tr>
 <tr>
 <td>Refusal</td>
@@ -487,21 +398,19 @@
 </tr>
 </tbody>
 </table>
-</div>
 <ul>
-<li><strong>Wall time</strong> is the sum of the segments' durations, with gaps between them not counted.</li>
-<li><strong>Tokens and cost</strong> are not recorded by the public harness.</li>
-<li><strong>For each sealed world</strong>, the evaluation records:
-<ul>
-<li>CPU time, peak memory and wall time;</li>
-<li>the kind of any failure: timeout, out of memory, crash, rejected output, or a failed environment build.</li>
-</ul>
-</li>
+<li>Wall time is the sum of the segments' durations, with gaps between them not counted.</li>
+<li>Tokens and cost are not recorded.</li>
 </ul>
 </div>
-        <div class="tabpanel prose" role="tabpanel" id="r-results" aria-labelledby="t-results" hidden><p>No agent results are shown yet. They will appear here once they are published.</p>
+        <div class="tabpanel prose" role="tabpanel" id="r-results" aria-labelledby="t-results" hidden><h2>Results</h2>
+<ul>
+<li>No agent has been run on the LIGO benchmark yet.</li>
+<li>The first scoring runs (27 November 2026) tested the scorer on the training data with fake trigger lists (<a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-first-scoring-run/">update</a>), and ran three toy searches end to end on one day of training data (<a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-toy-searches/">update</a>). A full run over the whole dataset has started.</li>
+<li>Agent results will appear here once they are published.</li>
+</ul>
 </div>
-        <div class="sources"><p><em>Sources: the <a href="https://github.com/kyoon-mit/agentic-ligo/tree/9f26b70">HEP-Ex-Bench repository</a> at commit 9f26b70 (<a href="https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/README.md">README</a>, <a href="https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/docs/METRICS.md">METRICS.md</a>, <a href="https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/docs/ISOLATION.md">ISOLATION.md</a>, <a href="https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/scripts/fleet/agent_run_record.py">agent_run_record.py</a>) and the LIGO <a href="https://github.com/kyoon-mit/agentic-ligo/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>.</em></p>
+        <div class="sources"><p><em>Sources: the LIGO <a href="https://github.com/kyoon-mit/agentic-ligo/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>; the updates of <a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-16-trigger-list/">16 November</a> and 27 November 2026 (<a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-first-scoring-run/">scorer</a>, <a href="https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-toy-searches/">toy searches</a>); for the harness, <a href="https://github.com/kyoon-mit/agentic-ligo/tree/9f26b70">kyoon-mit/agentic-ligo at 9f26b70</a> (<a href="https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/docs/ISOLATION.md">ISOLATION.md</a>, <a href="https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/scripts/fleet/agent_run_record.py">agent_run_record.py</a>).</em></p>
 </div>
       </div>
     </section>

@@ -1,53 +1,63 @@
-The full definitions are in the repository's [METRICS.md](https://github.com/kyoon-mit/agentic-ligo/blob/9f26b70/docs/METRICS.md). In short:
+## How a search is scored
 
-### One measurement in one sealed world
+### What the search hands in
 
-For each quantity the agent measures (for example the Higgs boson mass) in each sealed world, the agent reports a value $x$ with an uncertainty $\sigma$. The injected truth is $t$, the pull is $z = (x - t)/\sigma$, and the reference analysis quoted an uncertainty $\sigma_\mathrm{ref}$ in the same world. The charge is
+For each dataset, a CSV file with one row per candidate event:
 
-$$\Delta = \ln\frac{\sigma}{\sigma_\mathrm{ref}} + \frac{z^2 - 1}{2}.$$
+| Column | Content |
+|---|---|
+| 1 | Start GPS time, in seconds |
+| 2 | End GPS time, in seconds |
+| 3 | False-alarm rate, in Hz: how often noise alone would produce a candidate this loud |
 
-- The first part charges for being less precise than the reference, and gives credit for being more precise.
-- The second part charges for missing the truth by more than the quoted uncertainty allows.
-- The reference, with honest uncertainties, sits at 0 on average.
-- This is the logarithmic score: quoting your true uncertainty gives the lowest expected charge, and shrinking or padding it costs.
+Sky position (right ascension and declination) may be added later as two more columns.
 
-### Across the sealed worlds
+### Matching triggers to signals
 
-- **A bias shared by every world.** The answers from all worlds are combined like independent measurements (weighted by $1/\sigma^2$), and the combination's squared pull beyond what chance gives is added to the charge. A bias that repeats in every world therefore costs about twice what a random error of the same size costs.
-- **A crash.** A world where the pipeline fails is charged as "don't know": the charge of the task's no-answer guess, never less than 0. Skipping hard worlds never beats the reference.
+- A trigger matches an injected signal when its start-to-end interval overlaps the signal in time, within a tolerance. The tolerance is 0.1 s for now; the final value will be fixed before any results are seen.
+- Only signals that lie in analysable time in both detectors, with a computable signal-to-noise ratio, are scored.
+- A trigger that matches a signal that is not scored is dropped. It counts neither as found nor as a false alarm.
+- Waveforms with known defects in the injected data are left out of every metric.
 
-### The total score
+### Sensitivity at a fixed false-alarm rate
 
-$$\Delta_\mathrm{total} = \Delta_\mathrm{phys} + 0.10\,\Delta_\mathrm{cal} + 0.30\,\Delta_\mathrm{gof} + 0.10\,\Delta_\mathrm{syst} + 0.5\,\Delta_\mathrm{truth} + 0.05\,\Delta_\mathrm{claims} + 0.1\,\Delta_\mathrm{compute}$$
+- Only triggers with a false-alarm rate below the threshold count. A signal is found if such a trigger matches it.
+- The fraction found is reported per waveform, against the signal's amplitude (hrss) and against its signal-to-noise ratio in the two detectors combined.
+- Classes are compared at a fixed signal-to-noise ratio, since some were injected louder than others.
+- For testing, the main threshold is 1 per week. The final threshold is not chosen yet.
 
-$$S = e^{-2\,\Delta_\mathrm{total}}$$
+### Honest false-alarm rates
 
-<div markdown="1">
+- The search also runs on noise-only data from the same half of the run.
+- On that data, the number of triggers below each false-alarm rate must agree with what the claimed rates predict (rate × analysed time). Many more than predicted means the claimed rates are dishonest.
+- A search may estimate its background by time slides: shifting one detector's data against the other's, so that any coincidence comes from noise alone.
+- Sensitivity counts only for a search whose false-alarm rates are honest.
 
-| Term | Weight | What it checks |
-|---|---|---|
-| Physics | 1 | The measured quantities, each charged as above; the total uses the average of their scores, so a run that measures one of n quantities keeps at least 1/n of that quantity's score. |
-| Calibration | 0.10 | Detector calibrations the agent measures and logs (for example a shift of the lepton momentum scale), against the values injected into each world. |
-| Goodness of fit | 0.30 | Whether the agent's statistical model fits the data, over all worlds together (the per-world p-values combined by Fisher's method; no charge while the combined p-value is at least 1 %). |
-| Completeness | 0.10 | Whether the model includes the standard sources of uncertainty, as real effects rather than placeholders. |
-| Truthfulness | 0.5 | Whether the reported numbers match what the evaluator gets by refitting the agent's own model. |
-| Claims | 0.05 | Whether the side claims (expected and observed significance, a discovery claim, the split into statistical and systematic uncertainty, the fit quality) agree with that refit. |
-| Compute | 0.1 | Run time against the reference: free up to 1.5 times the reference's time, then +1 per doubling. A faster run can earn down to −1, but only when the rest of its score is as good as the reference's. |
+### Generalization
 
-</div>
+- The training signal classes and the held-out classes are reported separately.
+- The gap between the two measures how well the search finds signals it was never shown.
 
-- This total is for tasks where the agent hands in a statistical model, which the evaluator refits. The lepton calibration task uses its own total: physics, completeness, a check of the corrected Z boson peak (weight 0.5) and compute.
-- **The headline number** is the relative score: $S$ divided by the reference's $S$ on the same worlds, as a percentage. 100 % is the reference; above 100 % is better than the reference. Its ±1σ band comes from resampling the sealed worlds 1000 times.
+### Too-faint signals
 
-### Checks against cheating
+- Some injected signals are too faint for any real search to see (signal-to-noise ratio below 2 in the two detectors combined).
+- A search that finds many of them has seen the answer, for example by subtracting the public LIGO data, and is flagged.
+- A search that reads the answer key passes the honesty check, because it reports nothing on noise. Only this check catches it.
 
-- **Cheating submissions.** Submissions that cheat on purpose are part of the test suite. Each must score below the honest reference, or the score has a hole. Every task ships one that reports a constant, and the Higgs width task also ships one that always reports the Standard Model width. Others are generated automatically, for example an honest answer whose result file is a link the grader must not follow.
-- **Tripwire.** It flags answers that look placed rather than measured:
-  - values sitting on the points the truths are drawn from;
-  - published values;
-  - one value repeated across worlds;
-  - an answer pinned at zero signal;
-  - uncertainties far smaller than the reference's.
+### Testing the scorer
 
-  It flags a run for human review and never changes the score.
-- **Missing background.** A model that leaves out a standard background process is flagged, also without changing the score.
+The scorer is tested with fake trigger lists:
+- one that reports nothing;
+- triggers every second, with honest rates and with dishonest ones;
+- random triggers with dishonest rates;
+- one that reads the answer key.
+
+Each behaves as designed: the dishonest lists fail the honesty check, and the list that reads the answer key is caught by the too-faint check ([27 November update](https://kyoon-mit.github.io/projects/agentic-ligo/updates/2026-11-27-first-scoring-run/)).
+
+### Not decided yet
+
+- the final false-alarm-rate threshold and the final matching tolerance (1 per week and 0.1 s for testing);
+- whether the search also hands in the list of time it analysed;
+- a single combined score, and how runs are ranked;
+- how the test set is cut into sealed pieces;
+- later: the probability that a candidate is a real signal, and latency.
