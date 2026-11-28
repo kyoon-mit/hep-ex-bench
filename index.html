@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic LIGO · benchmark monitor</title>
+  <meta name="description" content="Interactive monitor for the agent benchmark: scoring rules to play with, the tasks and datasets, the agents, and the published runs.">
+  <link rel="canonical" href="https://kyoon-mit.github.io/agentic-ligo/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="monitor.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"
+    onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '\\[', right: '\\]', display: true}, {left: '\\(', right: '\\)', display: false}, {left: '$', right: '$', display: false}]});"></script>
+</head>
+<body class="theme-dark mon-body">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="mon-top">
+    <a class="mon-top__back" href="https://kyoon-mit.github.io/projects/agentic-ligo/">← Agentic LIGO</a>
+    <h1 class="mon-top__title">Agentic LIGO · benchmark monitor</h1>
+    <div class="mon-top__right">
+      <span class="mon-chip" id="mon-status">no published runs</span>
+      <button type="button" class="mon-btn mon-btn--ghost" id="mon-layout-reset" title="Put every panel back in its place">Reset layout</button>
+      <time class="mon-clock" id="mon-clock" aria-label="Local time"></time>
+    </div>
+  </header>
+  <main id="main">
+<div class="mon" id="mon" data-runs="runs.json">
+
+<div class="mon-tape" aria-label="At a glance">
+  <div class="mon-tape__track" id="mon-tape">
+    <span><b>h4l</b> built</span><span><b>h4l_width</b> built</span><span><b>lep_calib</b> built</span>
+    <span><b>gauss_peak</b> toy</span><span><b>bump_model</b> toy</span><span><b>peak_calib</b> toy</span><span><b>width_toy</b> toy</span>
+    <span><b>LIGO bursts</b> being designed</span>
+    <span>physics <b>×1</b></span><span>calibration <b>×0.10</b></span><span>goodness of fit <b>×0.30</b></span><span>completeness <b>×0.10</b></span>
+    <span>truthfulness <b>×0.5</b></span><span>claims <b>×0.05</b></span><span>compute <b>×0.1</b></span>
+    <span>score <b>S = e<sup>−2Δ</sup></b></span><span>reference <b>= 100 %</b></span><span>published runs <b class="mon-nruns">0</b></span>
+  </div>
+</div>
+
+<div class="mon-grid" id="mon-grid">
+
+  <section class="mon-panel mon-w8" data-panel="board" aria-labelledby="p-board">
+    <header class="mon-panel__head"><h2 id="p-board">Leaderboard</h2></header>
+    <div class="mon-panel__body">
+      <div class="mon-filters" id="b-filters" hidden>
+        <label>Task <select id="b-task"></select></label>
+        <label>Harness <select id="b-harness"></select></label>
+        <label>Prompt <select id="b-prompt"></select></label>
+        <label>Suite <select id="b-suite"></select></label>
+        <label>Sort <select id="b-sort"><option value="score">Relative score</option><option value="date">Date</option><option value="time">Wall time</option></select></label>
+      </div>
+      <div class="mon-local">
+        <button type="button" class="mon-btn mon-btn--ghost" id="b-open">Open a results file…</button>
+        <input type="file" id="b-file" accept=".json,application/json" hidden>
+        <span class="mon-local__src" id="b-src" aria-live="polite"></span>
+        <span class="mon-local__err" id="b-err" role="alert"></span>
+      </div>
+      <div id="b-board"></div>
+      <div id="b-detail" class="mon-detail" hidden></div>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w4" data-panel="glance" aria-labelledby="p-glance">
+    <header class="mon-panel__head"><h2 id="p-glance">At a glance</h2></header>
+    <div class="mon-panel__body mon-kpis">
+      <div class="mon-kpi"><span class="mon-kpi__n">3</span><span class="mon-kpi__l">physics tasks built</span></div>
+      <div class="mon-kpi"><span class="mon-kpi__n">4</span><span class="mon-kpi__l">toy tasks built</span></div>
+      <div class="mon-kpi"><span class="mon-kpi__n">7</span><span class="mon-kpi__l">terms in the total score</span></div>
+      <div class="mon-kpi"><span class="mon-kpi__n">3</span><span class="mon-kpi__l">prompt levels</span></div>
+      <div class="mon-kpi"><span class="mon-kpi__n">2 h</span><span class="mon-kpi__l">default agent time budget</span></div>
+      <div class="mon-kpi"><span class="mon-kpi__n mon-nruns">0</span><span class="mon-kpi__l">published runs</span></div>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w6" data-panel="charge" aria-labelledby="p-charge">
+    <header class="mon-panel__head"><h2 id="p-charge">Charge for one measurement</h2></header>
+    <div class="mon-panel__body">
+      <p class="mon-lede">$\Delta = \ln(\sigma/\sigma_\mathrm{ref}) + (z^2 - 1)/2$, with pull $z = (x - t)/\sigma$. Lower is better; the reference sits at 0. Drag on the map.</p>
+      <div class="mon-split">
+        <div class="mon-controls">
+          <label class="mon-slider">Quoted $\sigma/\sigma_\mathrm{ref}$ <output id="c-sig-o">1.00</output>
+            <input type="range" id="c-sig" min="-2" max="2" step="0.01" value="0"></label>
+          <label class="mon-slider">Pull $z$ <output id="c-z-o">0.00</output>
+            <input type="range" id="c-z" min="-4" max="4" step="0.01" value="1"></label>
+          <div class="mon-readout">
+            <div><span class="mon-k">Charge Δ</span><span class="mon-v" id="c-d">0.000</span></div>
+            <div><span class="mon-k">Score $e^{-2\Delta}$</span><span class="mon-v" id="c-s">1.000</span></div>
+          </div>
+          <p class="mon-note" id="c-say"></p>
+        </div>
+        <figure class="mon-fig">
+          <canvas id="c-map" width="480" height="320" aria-label="Charge against quoted uncertainty and pull"></canvas>
+          <figcaption>Horizontal: $\sigma/\sigma_\mathrm{ref}$ from ¼ to 4 (log). Vertical: pull −4 to 4. Green beats the reference, red loses to it; the dotted curve is Δ = 0.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w6" data-panel="honest" aria-labelledby="p-honest">
+    <header class="mon-panel__head"><h2 id="p-honest">Why honest uncertainties win</h2></header>
+    <div class="mon-panel__body">
+      <p class="mon-lede">If the real error is Gaussian with width $\sigma_\mathrm{true}$, the expected charge per world is $\ln(\sigma/\sigma_\mathrm{ref}) + \big((\sigma_\mathrm{true}/\sigma)^2 - 1\big)/2$, lowest at $\sigma = \sigma_\mathrm{true}$. With the shared-bias term over $K$ worlds, the pull part grows by $(1 + 1/K)$ and the best choice moves to $\sigma_\mathrm{true}\sqrt{1 + 1/K}$.</p>
+      <div class="mon-split">
+        <div class="mon-controls">
+          <label class="mon-slider">Real error $\sigma_\mathrm{true}/\sigma_\mathrm{ref}$ <output id="h-true-o">1.00</output>
+            <input type="range" id="h-true" min="-1" max="1" step="0.01" value="0"></label>
+          <label class="mon-slider">Quoted $\sigma/\sigma_\mathrm{ref}$ <output id="h-sig-o">0.50</output>
+            <input type="range" id="h-sig" min="-2" max="2" step="0.01" value="-1"></label>
+          <label class="mon-check"><input type="checkbox" id="h-bias"> Include the shared-bias term</label>
+          <label class="mon-slider" id="h-k-wrap" hidden>Worlds $K$ <output id="h-k-o">15</output>
+            <input type="range" id="h-k" min="2" max="60" step="1" value="15"></label>
+          <div class="mon-readout">
+            <div><span class="mon-k">Expected charge</span><span class="mon-v" id="h-d">0.000</span></div>
+            <div><span class="mon-k">Best possible</span><span class="mon-v" id="h-best">0.000</span></div>
+          </div>
+        </div>
+        <figure class="mon-fig">
+          <svg id="h-plot" viewBox="0 0 480 300" role="img" aria-label="Expected charge against quoted uncertainty"></svg>
+          <figcaption>The dot is your choice; the ring is the best choice.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w8" data-panel="total" aria-labelledby="p-total">
+    <header class="mon-panel__head"><h2 id="p-total">Total score composer</h2></header>
+    <div class="mon-panel__body">
+      <p class="mon-lede">$\Delta_\mathrm{total} = \Delta_\mathrm{phys} + 0.10\,\Delta_\mathrm{cal} + 0.30\,\Delta_\mathrm{gof} + 0.10\,\Delta_\mathrm{syst} + 0.5\,\Delta_\mathrm{truth} + 0.05\,\Delta_\mathrm{claims} + 0.1\,\Delta_\mathrm{compute}$, $S = e^{-2\Delta_\mathrm{total}}$, for tasks where the agent hands in a statistical model. The headline number is $S$ over the reference's $S$.</p>
+      <div class="mon-split mon-split--wide">
+        <div class="mon-controls" id="t-sliders"></div>
+        <div class="mon-total">
+          <div class="mon-bars" id="t-bars" aria-label="Weighted contributions to the total charge"></div>
+          <label class="mon-slider mon-slider--small">Reference's total charge <output id="t-ref-o">0.00</output>
+            <input type="range" id="t-ref" min="-1" max="2" step="0.01" value="0"></label>
+          <div class="mon-readout mon-readout--big">
+            <div><span class="mon-k">Total charge</span><span class="mon-v" id="t-d">0.000</span></div>
+            <div><span class="mon-k">$S$</span><span class="mon-v" id="t-s">1.000</span></div>
+            <div><span class="mon-k">Relative score</span><span class="mon-v mon-v--hero" id="t-rel">100 %</span></div>
+          </div>
+          <button type="button" class="mon-btn" id="t-reset">Reset to the reference</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w4" data-panel="compute" aria-labelledby="p-compute">
+    <header class="mon-panel__head"><h2 id="p-compute">Compute charge</h2></header>
+    <div class="mon-panel__body">
+      <p class="mon-lede">Per world $d = \log_2(t/t_\mathrm{ref})$, floored at −1. Slower: the first 1.5× is free. Faster: credit from 1×, fading out as the rest of the score gets up to 0.05 worse than the reference's.</p>
+      <label class="mon-slider">Run time $t/t_\mathrm{ref}$ <output id="k-r-o">1.00</output>
+        <input type="range" id="k-r" min="-2" max="4" step="0.01" value="0"></label>
+      <label class="mon-slider">Rest worse than the reference by <output id="k-g-o">0.000</output>
+        <input type="range" id="k-g" min="0" max="0.08" step="0.001" value="0"></label>
+      <div class="mon-readout">
+        <div><span class="mon-k">$\Delta_\mathrm{compute}$</span><span class="mon-v" id="k-d">0.000</span></div>
+        <div><span class="mon-k">Speed credit kept</span><span class="mon-v" id="k-gv">100 %</span></div>
+        <div><span class="mon-k">Weighted (× 0.1)</span><span class="mon-v" id="k-w">0.000</span></div>
+      </div>
+      <figure class="mon-fig">
+        <svg id="k-plot" viewBox="0 0 480 260" role="img" aria-label="Compute charge against run time"></svg>
+        <figcaption>Same time in every world, no timeouts. Shaded: the speed credit.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w6" data-panel="bias" aria-labelledby="p-bias">
+    <header class="mon-panel__head"><h2 id="p-bias">A bias shared by every world</h2></header>
+    <div class="mon-panel__body">
+      <p class="mon-lede">The answers from all $K$ worlds are combined like independent measurements; $B = (z^{\ast 2} - 1)/(2K)$ is added once to the quantity's mean charge. A random error averages out in $z^\ast$; a repeated bias does not. Every world here quotes the reference's uncertainty.</p>
+      <div class="mon-split">
+        <div class="mon-controls">
+          <label class="mon-slider">Worlds $K$ <output id="s-k-o">15</output>
+            <input type="range" id="s-k" min="3" max="60" step="1" value="15"></label>
+          <label class="mon-slider">Shared bias (σ) <output id="s-b-o">0.50</output>
+            <input type="range" id="s-b" min="0" max="2" step="0.01" value="0.5"></label>
+          <label class="mon-slider">Extra random error (σ) <output id="s-e-o">0.00</output>
+            <input type="range" id="s-e" min="0" max="2" step="0.01" value="0"></label>
+          <button type="button" class="mon-btn" id="s-roll">Draw new worlds</button>
+          <div class="mon-readout">
+            <div><span class="mon-k">Mean charge per world</span><span class="mon-v" id="s-m">0.000</span></div>
+            <div><span class="mon-k">Combined pull $z^\ast$</span><span class="mon-v" id="s-z">0.000</span></div>
+            <div><span class="mon-k">Shared-bias term $B$</span><span class="mon-v" id="s-bt">0.000</span></div>
+            <div><span class="mon-k">Charge for the quantity</span><span class="mon-v mon-v--hero" id="s-t">0.000</span></div>
+          </div>
+        </div>
+        <figure class="mon-fig">
+          <svg id="s-plot" viewBox="0 0 480 300" role="img" aria-label="Pulls of each world and their combination"></svg>
+          <figcaption>Dots: each world's pull. Line: the combination's offset $z^\ast/\sqrt{K}$ in σ; band: the ±$1/\sqrt{K}$ chance gives it.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w6" data-panel="ligo" aria-labelledby="p-ligo">
+    <header class="mon-panel__head"><h2 id="p-ligo">LIGO benchmark: the planned path</h2></header>
+    <div class="mon-panel__body">
+      <ol class="mon-flow" id="l-flow">
+        <li><button type="button" data-step="0"><b>Strain</b><span>O3, Hanford and Livingston, 16,384 Hz, simulated bursts added</span></button></li>
+        <li><button type="button" data-step="1"><b>Agent pipeline</b><span>written on O3a training data, run offline</span></button></li>
+        <li><button type="button" data-step="2"><b>Trigger list</b><span>CSV: start GPS, end GPS, false-alarm rate (Hz)</span></button></li>
+        <li><button type="button" data-step="3"><b>Scoring</b><span>on the sealed O3b test set</span></button></li>
+      </ol>
+      <div class="mon-flow-detail" id="l-detail" aria-live="polite"></div>
+      <ul class="mon-checks">
+        <li>Sensitivity at a fixed false-alarm rate</li>
+        <li>Honest false-alarm rates</li>
+        <li>Generalization to held-out classes</li>
+        <li>Cheating check with too-faint signals</li>
+        <li>The standard search plots</li>
+        <li class="is-later">Later: latency, probability of a real signal</li>
+      </ul>
+      <p class="mon-note">Nothing is built yet; the draft is in the <a href="https://github.com/kyoon-mit/hep-ex-bench/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>.</p>
+    </div>
+  </section>
+
+  <section class="mon-panel mon-w12" data-panel="reference" aria-labelledby="p-reference">
+    <header class="mon-panel__head"><h2 id="p-reference">Reference</h2></header>
+    <div class="mon-panel__body">
+      <div class="mon-tabs" role="tablist" aria-label="Reference sections">
+        <button type="button" role="tab" class="mon-tab" aria-selected="true" aria-controls="r-how" id="t-how">How it works</button>
+        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-scoring" id="t-scoring" tabindex="-1">Scoring</button>
+        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-tasks" id="t-tasks" tabindex="-1">Tasks and datasets</button>
+        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-agents" id="t-agents" tabindex="-1">Models and agents</button>
+        <button type="button" role="tab" class="mon-tab" aria-selected="false" aria-controls="r-results" id="t-results" tabindex="-1">Results</button>
+      </div>
+      <div class="mon-tabpanel prose" role="tabpanel" id="r-how" aria-labelledby="t-how"><ul>
+<li>An AI agent gets a public dataset and writes an analysis pipeline: a folder with a script, <code>run.sh &lt;dataset&gt; &lt;out&gt;</code>, that writes its answers to a file, <code>RESULT.json</code>.</li>
+<li>The pipeline is then frozen and run, unchanged and offline, on many sealed datasets (&quot;sealed worlds&quot;). Each sealed world is generated with injected signals, and with detector settings varied within realistic uncertainties.</li>
+<li>Every answer is compared with the injected truth. The run is scored relative to an expert reference analysis, which goes through exactly the same path.</li>
+<li>The sealed worlds and their truths are not public. The code is: <a href="https://github.com/hep-ex-bench/hep-ex-bench">hep-ex-bench/hep-ex-bench</a> (Apache-2.0), with the public datasets on <a href="https://huggingface.co/hep-ex-bench">Hugging Face</a> (CC BY 4.0).</li>
+</ul>
+</div>
+      <div class="mon-tabpanel prose" role="tabpanel" id="r-scoring" aria-labelledby="t-scoring" hidden><p>The full definitions are in the repository's <a href="https://github.com/hep-ex-bench/hep-ex-bench/blob/9f26b70/docs/METRICS.md">METRICS.md</a>. In short:</p>
+<h3>One measurement in one sealed world</h3>
+<p>For each quantity the agent measures (for example the Higgs boson mass) in each sealed world, the agent reports a value $x$ with an uncertainty $\sigma$. The injected truth is $t$, the pull is $z = (x - t)/\sigma$, and the reference analysis quoted an uncertainty $\sigma_\mathrm{ref}$ in the same world. The charge is</p>
+<p>$$\Delta = \ln\frac{\sigma}{\sigma_\mathrm{ref}} + \frac{z^2 - 1}{2}.$$</p>
+<ul>
+<li>The first part charges for being less precise than the reference, and gives credit for being more precise.</li>
+<li>The second part charges for missing the truth by more than the quoted uncertainty allows.</li>
+<li>The reference, with honest uncertainties, sits at 0 on average.</li>
+<li>This is the logarithmic score: quoting your true uncertainty gives the lowest expected charge, and shrinking or padding it costs.</li>
+</ul>
+<h3>Across the sealed worlds</h3>
+<ul>
+<li><strong>A bias shared by every world.</strong> The answers from all worlds are combined like independent measurements (weighted by $1/\sigma^2$), and the combination's squared pull beyond what chance gives is added to the charge. A bias that repeats in every world therefore costs about twice what a random error of the same size costs.</li>
+<li><strong>A crash.</strong> A world where the pipeline fails is charged as &quot;don't know&quot;: the charge of the task's no-answer guess, never less than 0. Skipping hard worlds never beats the reference.</li>
+</ul>
+<h3>The total score</h3>
+<p>$$\Delta_\mathrm{total} = \Delta_\mathrm{phys} + 0.10\,\Delta_\mathrm{cal} + 0.30\,\Delta_\mathrm{gof} + 0.10\,\Delta_\mathrm{syst} + 0.5\,\Delta_\mathrm{truth} + 0.05\,\Delta_\mathrm{claims} + 0.1\,\Delta_\mathrm{compute}$$</p>
+<p>$$S = e^{-2\,\Delta_\mathrm{total}}$$</p>
+<div>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Weight</th>
+<th>What it checks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Physics</td>
+<td>1</td>
+<td>The measured quantities, each charged as above; the total uses the average of their scores, so a run that measures one of n quantities keeps at least 1/n of that quantity's score.</td>
+</tr>
+<tr>
+<td>Calibration</td>
+<td>0.10</td>
+<td>Detector calibrations the agent measures and logs (for example a shift of the lepton momentum scale), against the values injected into each world.</td>
+</tr>
+<tr>
+<td>Goodness of fit</td>
+<td>0.30</td>
+<td>Whether the agent's statistical model fits the data, over all worlds together (the per-world p-values combined by Fisher's method; no charge while the combined p-value is at least 1 %).</td>
+</tr>
+<tr>
+<td>Completeness</td>
+<td>0.10</td>
+<td>Whether the model includes the standard sources of uncertainty, as real effects rather than placeholders.</td>
+</tr>
+<tr>
+<td>Truthfulness</td>
+<td>0.5</td>
+<td>Whether the reported numbers match what the evaluator gets by refitting the agent's own model.</td>
+</tr>
+<tr>
+<td>Claims</td>
+<td>0.05</td>
+<td>Whether the side claims (expected and observed significance, a discovery claim, the split into statistical and systematic uncertainty, the fit quality) agree with that refit.</td>
+</tr>
+<tr>
+<td>Compute</td>
+<td>0.1</td>
+<td>Run time against the reference: free up to 1.5 times the reference's time, then +1 per doubling. A faster run can earn down to −1, but only when the rest of its score is as good as the reference's.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>This total is for tasks where the agent hands in a statistical model, which the evaluator refits. The lepton calibration task uses its own total: physics, completeness, a check of the corrected Z boson peak (weight 0.5) and compute.</li>
+<li><strong>The headline number</strong> is the relative score: $S$ divided by the reference's $S$ on the same worlds, as a percentage. 100 % is the reference; above 100 % is better than the reference. Its ±1σ band comes from resampling the sealed worlds 1000 times.</li>
+</ul>
+<h3>Checks against cheating</h3>
+<ul>
+<li>
+<p><strong>Cheating submissions.</strong> Submissions that cheat on purpose are part of the test suite. Each must score below the honest reference, or the score has a hole. Every task ships one that reports a constant, and the Higgs width task also ships one that always reports the Standard Model width. Others are generated automatically, for example an honest answer whose result file is a link the grader must not follow.</p>
+</li>
+<li>
+<p><strong>Tripwire.</strong> It flags answers that look placed rather than measured:</p>
+<ul>
+<li>values sitting on the points the truths are drawn from;</li>
+<li>published values;</li>
+<li>one value repeated across worlds;</li>
+<li>an answer pinned at zero signal;</li>
+<li>uncertainties far smaller than the reference's.</li>
+</ul>
+<p>It flags a run for human review and never changes the score.</p>
+</li>
+<li>
+<p><strong>Missing background.</strong> A model that leaves out a standard background process is flagged, also without changing the score.</p>
+</li>
+</ul>
+</div>
+      <div class="mon-tabpanel prose" role="tabpanel" id="r-tasks" aria-labelledby="t-tasks" hidden><h3>High energy physics (built)</h3>
+<div>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>What the agent measures</th>
+<th>What it hands in</th>
+<th>Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HiggsLepMass (<code>h4l</code>)</td>
+<td>The Higgs boson signal strength and mass from H→ZZ*→4ℓ, detector calibrations included</td>
+<td>Values with uncertainties, and a binned likelihood model</td>
+<td>CMS Open Data simulation, 2016 conditions</td>
+</tr>
+<tr>
+<td>HiggsWidth (<code>h4l_width</code>)</td>
+<td>The Higgs width relative to the Standard Model, and the on-shell signal strength, from H→ZZ→4ℓ</td>
+<td>Intervals, and a binned likelihood model whose rates scale with them</td>
+<td>CMS Open Data simulation and private samples through the same detector simulation, 2016 conditions</td>
+</tr>
+<tr>
+<td>LepCalib (<code>lep_calib</code>)</td>
+<td>Lepton calibrations from Z→ℓℓ</td>
+<td>Corrections as functions, in the correctionlib format</td>
+<td>CMS Open Data derived simulation, 2016 conditions</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>Data format:</strong> reconstructed events in the NanoAOD format, slimmed to muons, electrons, photons from final-state radiation, trigger objects and trigger decisions.</li>
+<li><strong>Public datasets:</strong> <code>hep-ex-bench/HiggsLepMass</code>, <code>hep-ex-bench/HiggsWidth</code> and <code>hep-ex-bench/LepCalib</code> on Hugging Face. The repository's instructions use revision <code>v0.2</code>.</li>
+<li><strong>Sealed worlds:</strong> for the two Higgs tasks, each sealed world carries about twice the integrated luminosity of the public dataset. For the lepton calibration task, every world carries 10 fb⁻¹.</li>
+</ul>
+<h3>Toy tasks (built)</h3>
+<p>Small tasks shipped whole in the repository, as worked examples for adding a task.</p>
+<div>
+<table>
+<thead>
+<tr>
+<th>Toy</th>
+<th>What the agent measures</th>
+<th>What it hands in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gauss_peak</code></td>
+<td>A Gaussian peak</td>
+<td>Values with uncertainties</td>
+</tr>
+<tr>
+<td><code>bump_model</code></td>
+<td>A resonance on a falling background</td>
+<td>Values, and a binned likelihood model</td>
+</tr>
+<tr>
+<td><code>peak_calib</code></td>
+<td>A muon momentum scale, resolution and efficiency from a Z boson peak</td>
+<td>Corrections</td>
+</tr>
+<tr>
+<td><code>width_toy</code></td>
+<td>A width ratio from an off-shell mass spectrum</td>
+<td>Intervals, and a binned likelihood model</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3>LIGO (being designed)</h3>
+<p>Nothing is built yet. The draft is in the <a href="https://github.com/kyoon-mit/hep-ex-bench/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>.</p>
+<ul>
+<li>
+<p><strong>What the agent hands in:</strong> for each dataset, a trigger list. It is a CSV file with one row per candidate event, giving:</p>
+<ul>
+<li>column 1: the start GPS time, in seconds;</li>
+<li>column 2: the end GPS time, in seconds;</li>
+<li>column 3: the false-alarm rate, in Hz.</li>
+</ul>
+<p>Sky position (right ascension and declination) may be added later.</p>
+</li>
+<li>
+<p><strong>Planned benchmarks:</strong></p>
+<ul>
+<li><strong>Sensitivity at a fixed false-alarm rate:</strong> the fraction of injected signals found, per waveform, against signal amplitude and signal-to-noise ratio. Classes are compared at a fixed signal-to-noise ratio, since some were injected louder than others.</li>
+<li><strong>Honest false-alarm rates:</strong> checked on the noise-only data.</li>
+<li><strong>Generalization:</strong> the gap between the signal classes seen in training and the classes held out from it.</li>
+<li><strong>Cheating check:</strong> some injected signals are too faint for any real search. A search that finds many of them has most likely subtracted the public LIGO data.</li>
+<li><strong>The standard plots of gravitational-wave searches:</strong>
+<ul>
+<li>injections found or missed;</li>
+<li>the fraction found against signal strength;</li>
+<li>the number of candidates above each false-alarm rate, compared with what noise alone gives.</li>
+</ul>
+</li>
+<li><strong>Later:</strong> latency, and the probability that a candidate is a real signal.</li>
+</ul>
+</li>
+<li>
+<p><strong>The data:</strong></p>
+<ul>
+<li>real LIGO strain from the third observing run (O3), from the Hanford and Livingston detectors, at 16,384 Hz, with simulated short bursts (under 10 s) added;</li>
+<li>training data from the first half of the run (O3a): one set with injected signals and one with noise only;</li>
+<li>a sealed test set from the second half (O3b), with the same two parts;</li>
+<li>training signals: 39 waveforms (19 sine-Gaussians, 16 white-noise bursts, 4 binary black hole mergers on circular orbits);</li>
+<li>test signals: the same 39 plus five classes the agent never sees in training;</li>
+<li>not on Hugging Face; where the benchmark will host it is not decided yet.</li>
+</ul>
+</li>
+<li>
+<p><strong>Offline:</strong> agents run with no network. O3 strain is public, so subtracting it from the data would reveal every injection.</p>
+</li>
+<li>
+<p><strong>A toy task comes first:</strong> simulated noise with simple injected bursts, to test the scoring and the cheating submissions before the real data.</p>
+</li>
+</ul>
+</div>
+      <div class="mon-tabpanel prose" role="tabpanel" id="r-agents" aria-labelledby="t-agents" hidden><ul>
+<li>
+<p><strong>Harnesses:</strong> agents run through command-line coding tools with the operator's own login: Claude Code, Codex and opencode. The run record also handles Vibe.</p>
+</li>
+<li>
+<p><strong>Models:</strong> the model and its reasoning effort are set for each session. This page does not list which models have been run.</p>
+</li>
+<li>
+<p><strong>Prompt levels:</strong> each task has up to three prompts, each adding briefing to the one before. For the Higgs mass task:</p>
+<ul>
+<li>a blind prompt, with only the framing and what to hand in;</li>
+<li>the baseline, which adds the physics context and the published measurement;</li>
+<li>a guided prompt, which adds an ordered plan, as a physicist would write it.</li>
+</ul>
+<p>The score is the same for every level, so a difference in score measures what the extra briefing is worth.</p>
+</li>
+<li>
+<p><strong>The agent's session:</strong></p>
+<ul>
+<li>It runs in a sandbox (bubblewrap) with its own empty home folder and caches, and with the evaluator's files hidden.</li>
+<li>It has a time budget, 2 hours by default, and is stopped when the budget runs out.</li>
+<li>An interrupted session can resume with the time it has left.</li>
+</ul>
+</li>
+<li>
+<p><strong>The evaluation of the frozen pipeline:</strong></p>
+<ul>
+<li>It runs in a sandbox with the network blocked and the sealed truths not mounted.</li>
+<li>A submission may hold at most 5 MB per file and 50 MB in total, with no bundled installed packages; dependencies are declared and installed by the harness.</li>
+</ul>
+</li>
+</ul>
+<h3>What is recorded for each agent session</h3>
+<div>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness, model, effort</td>
+<td>As requested for the session.</td>
+</tr>
+<tr>
+<td>Prompt, bundle, suite</td>
+<td>The prompt given, the participant bundle, and the sealed suite the pipeline is evaluated on.</td>
+</tr>
+<tr>
+<td>Budget</td>
+<td>The session's whole time budget, in seconds.</td>
+</tr>
+<tr>
+<td>Segments</td>
+<td>For each stretch of work: start and end times, its budget, and its exit code (124 means stopped at the budget).</td>
+</tr>
+<tr>
+<td>Harness version</td>
+<td>The version of the coding tool.</td>
+</tr>
+<tr>
+<td>As run</td>
+<td>What the coding tool itself reports ran: the model, its version and the session id. Claude Code adds its permission mode; Codex adds its reasoning effort, approval and sandbox settings.</td>
+</tr>
+<tr>
+<td>Refusal</td>
+<td>Why a session was refused before it started, for example a login that would expire before the budget ends.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><strong>Wall time</strong> is the sum of the segments' durations, with gaps between them not counted.</li>
+<li><strong>Tokens and cost</strong> are not recorded by the public harness.</li>
+<li><strong>For each sealed world</strong>, the evaluation records:
+<ul>
+<li>CPU time, peak memory and wall time;</li>
+<li>the kind of any failure: timeout, out of memory, crash, rejected output, or a failed environment build.</li>
+</ul>
+</li>
+</ul>
+</div>
+      <div class="mon-tabpanel prose" role="tabpanel" id="r-results" aria-labelledby="t-results" hidden><p>No agent results are shown yet. They will appear here once they are published.</p>
+</div>
+      <div class="mon-sources"><p><em>Sources: the <a href="https://github.com/hep-ex-bench/hep-ex-bench/tree/9f26b70">HEP-Ex-Bench repository</a> at commit 9f26b70 (<a href="https://github.com/hep-ex-bench/hep-ex-bench/blob/9f26b70/README.md">README</a>, <a href="https://github.com/hep-ex-bench/hep-ex-bench/blob/9f26b70/docs/METRICS.md">METRICS.md</a>, <a href="https://github.com/hep-ex-bench/hep-ex-bench/blob/9f26b70/docs/ISOLATION.md">ISOLATION.md</a>, <a href="https://github.com/hep-ex-bench/hep-ex-bench/blob/9f26b70/scripts/fleet/agent_run_record.py">agent_run_record.py</a>) and the LIGO <a href="https://github.com/kyoon-mit/hep-ex-bench/blob/ligo-benchmarks/docs/LIGO_BENCHMARKS_DESIGN.md">design note</a>.</em></p>
+</div>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script src="monitor.js"></script>
+  </main>
+  <footer class="mon-foot">Built from the <a href="https://github.com/kyoon-mit/agentic-ligo/tree/gh-pages">gh-pages branch of kyoon-mit/agentic-ligo</a>. Part of <a href="https://kyoon-mit.github.io/projects/agentic-ligo/">Agentic LIGO</a>.</footer>
+</body>
+</html>
