@@ -158,7 +158,7 @@
   }
   const isFake = r => str(r.kind) === 'fake';
   const sens = r => num(obj(r.sensitivity).overall);
-  const nameOf = r => str(r.model) || str(r.id) || '?';
+  const nameOf = r => str(r.display_name) || str(r.model) || str(r.id) || '?';
   const honesty = r => { const p = obj(r.far_honesty).pass; return p === true ? 'pass' : p === false ? 'fail' : null; };
   const faint = r => { const f = obj(r.faint_check).flagged; return f === true ? 'flag' : f === false ? 'clear' : null; };
   const flagged = r => honesty(r) === 'fail' || faint(r) === 'flag';

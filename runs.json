@@ -1,5 +1,214 @@
 {
- "note": "Published runs for the benchmark monitor (https://kyoon-mit.github.io/agentic-ligo/). Only published results go here. far_threshold_hz: the one false-alarm-rate threshold all runs are scored at (null until chosen). Each run: id, date (YYYY-MM-DD), kind (agent, reference or fake; fake = scorer test lists, shown only under Scorer tests), harness (claude, codex, opencode, vibe or null), model, effort, prompt (null when not an agent), split (train or test), sensitivity {overall, train_classes, heldout_classes (test split only; never broken out by name), by_family {sine_gaussian, white_noise_burst, bbh_circular} or null} (fractions 0 to 1 of scored signals found at far_threshold_hz), snr50 {train_classes, heldout_classes} (combined SNR at which half are found), generalization_gap (train_classes minus heldout_classes), far_honesty {pass, p_value, observed, expected}, faint_check {flagged, found_fraction}, wall_time_s, budget_s, segments [{start_s, end_s, exit}], datasets {n, failed {timeout, oom, crash, rejected, env, missing}}. null = not measured. Sorted by sensitivity.overall; runs whose rates are not honest or that the too-faint check flags go last. No ranking is chosen yet.",
- "far_threshold_hz": null,
- "runs": []
+ "note": "Published runs for the benchmark monitor (https://kyoon-mit.github.io/agentic-ligo/). Only published results go here. far_threshold_hz: the one false-alarm-rate threshold all runs are scored at (null until chosen). Each run: id, display_name (optional; shown instead of model or id), date (YYYY-MM-DD), kind (agent, reference or fake; fake = scorer test lists, shown only under Scorer tests), harness (claude, codex, opencode, vibe or null), model, effort, prompt (null when not an agent), split (train or test), sensitivity {overall, train_classes, heldout_classes (test split only; never broken out by name), by_family {sine_gaussian, white_noise_burst, bbh_circular} or null} (fractions 0 to 1 of scored signals found at far_threshold_hz), snr50 {train_classes, heldout_classes} (combined SNR at which half are found), generalization_gap (train_classes minus heldout_classes), far_honesty {pass, p_value, observed, expected}, faint_check {flagged, found_fraction}, wall_time_s, budget_s, segments [{start_s, end_s, exit}], datasets {n, failed {timeout, oom, crash, rejected, env, missing}}. null = not measured. Sorted by sensitivity.overall; runs whose rates are not honest or that the too-faint check flags go last. No ranking is chosen yet.",
+ "far_threshold_hz": 1.6534391534391535e-06,
+ "runs": [
+  {
+   "id": "toy-ep-v0",
+   "display_name": "Excess power (toy, M0)",
+   "date": "2026-11-27",
+   "kind": "reference",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 0.0,
+    "train_classes": 0.0,
+    "heldout_classes": null,
+    "by_family": {
+     "bbh_circular": 0.0,
+     "sine_gaussian": 0.0,
+     "white_noise_burst": 0.0
+    }
+   },
+   "snr50": {
+    "train_classes": null,
+    "heldout_classes": null
+   },
+   "generalization_gap": null,
+   "far_honesty": {
+    "pass": true,
+    "p_value": 0.917,
+    "observed": 0,
+    "expected": 0.0819
+   },
+   "faint_check": {
+    "flagged": false,
+    "found_fraction": 0.0
+   },
+   "wall_time_s": null,
+   "datasets": null
+  },
+  {
+   "id": "toy-cnn-v0",
+   "display_name": "1D CNN (toy, M1)",
+   "date": "2026-11-27",
+   "kind": "reference",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 0.002336448598130841,
+    "train_classes": 0.002336448598130841,
+    "heldout_classes": null,
+    "by_family": {
+     "bbh_circular": 0.0,
+     "sine_gaussian": 0.0,
+     "white_noise_burst": 0.0053475935828877
+    }
+   },
+   "snr50": {
+    "train_classes": null,
+    "heldout_classes": null
+   },
+   "generalization_gap": null,
+   "far_honesty": {
+    "pass": true,
+    "p_value": 1.0,
+    "observed": 0,
+    "expected": 0.0819
+   },
+   "faint_check": {
+    "flagged": false,
+    "found_fraction": 0.0
+   },
+   "wall_time_s": null,
+   "datasets": null
+  },
+  {
+   "id": "toy-ae-v0",
+   "display_name": "Noise-only autoencoder (toy, M2)",
+   "date": "2026-11-27",
+   "kind": "reference",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 0.002336448598130841,
+    "train_classes": 0.002336448598130841,
+    "heldout_classes": null,
+    "by_family": {
+     "bbh_circular": 0.0,
+     "sine_gaussian": 0.0,
+     "white_noise_burst": 0.0053475935828877
+    }
+   },
+   "snr50": {
+    "train_classes": null,
+    "heldout_classes": null
+   },
+   "generalization_gap": null,
+   "far_honesty": {
+    "pass": true,
+    "p_value": 0.289,
+    "observed": 0,
+    "expected": 0.0819
+   },
+   "faint_check": {
+    "flagged": false,
+    "found_fraction": 0.0
+   },
+   "wall_time_s": null,
+   "datasets": null
+  },
+  {
+   "id": "nothing",
+   "date": "2026-11-27",
+   "kind": "fake",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 0.0,
+    "train_classes": null,
+    "heldout_classes": null,
+    "by_family": null
+   },
+   "far_honesty": {
+    "pass": true
+   },
+   "faint_check": {
+    "flagged": false
+   }
+  },
+  {
+   "id": "every_second_honest",
+   "date": "2026-11-27",
+   "kind": "fake",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 0.0,
+    "train_classes": null,
+    "heldout_classes": null,
+    "by_family": null
+   },
+   "far_honesty": {
+    "pass": true
+   },
+   "faint_check": {
+    "flagged": false
+   }
+  },
+  {
+   "id": "every_second_liar",
+   "date": "2026-11-27",
+   "kind": "fake",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 1.0,
+    "train_classes": null,
+    "heldout_classes": null,
+    "by_family": null
+   },
+   "far_honesty": {
+    "pass": false
+   },
+   "faint_check": {
+    "flagged": true
+   }
+  },
+  {
+   "id": "random_liar",
+   "date": "2026-11-27",
+   "kind": "fake",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 0.069,
+    "train_classes": null,
+    "heldout_classes": null,
+    "by_family": null
+   },
+   "far_honesty": {
+    "pass": false
+   },
+   "faint_check": {
+    "flagged": false
+   }
+  },
+  {
+   "id": "oracle",
+   "date": "2026-11-27",
+   "kind": "fake",
+   "harness": null,
+   "model": null,
+   "split": "train",
+   "sensitivity": {
+    "overall": 1.0,
+    "train_classes": null,
+    "heldout_classes": null,
+    "by_family": null
+   },
+   "far_honesty": {
+    "pass": true
+   },
+   "faint_check": {
+    "flagged": true
+   }
+  }
+ ]
 }
