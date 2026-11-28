@@ -148,7 +148,7 @@
     <span class="tile__desc">${esc(h.note)}</span></div>`).join('');
 
   // ---------------------------------------------------------------- leaderboard
-  const board = $('b-board'), kindSeg = $('b-kind'), splitSeg = $('b-split'), thrNote = $('b-thr'), src = $('b-src'), err = $('b-err'), file = $('b-file');
+  const board = $('b-board'), kindSeg = $('b-kind'), splitSeg = $('b-split'), thrNote = $('b-thr'), statusNote = $('b-status'), src = $('b-src'), err = $('b-err'), file = $('b-file');
   const RATES = [['hour', 3600], ['day', 86400], ['week', 604800], ['year', 31557600], ['10 years', 315576000]];
   function rateText(v) {
     const r = num(v);
@@ -166,7 +166,7 @@
   const SPLIT = { test: 'Test', train: 'Training', other: 'Other' };
   const mins = sec => (!Number.isFinite(sec) ? '–' : sec < 120 ? `${Math.round(sec)} s` : `${Math.round(sec / 60)} min`);
   const KIND = { agent: 'agent', reference: 'reference search', fake: 'scorer test' };
-  let published = { thr: null, runs: [] }, failed = false, loaded = false, current = published, label = null, view = 'board', split = null;
+  let published = { thr: null, status: '', runs: [] }, failed = false, loaded = false, current = published, label = null, view = 'board', split = null;
 
   function setStatus(t) { $('status').textContent = t; }
   function checks(r) {
@@ -188,6 +188,7 @@
   function render() {
     const t = rateText(current.thr);
     thrNote.textContent = t ? `Sensitivity is the fraction of scored signals found at a false-alarm rate of ${t}.` : 'No false-alarm-rate threshold is set for this run list yet.';
+    statusNote.textContent = view === 'board' ? str(current.status).trim() : '';
     if (!loaded && !label) { board.innerHTML = '<div class="empty"><b>Loading the published runs…</b></div>'; return; }
     if (failed && !label) {
       board.innerHTML = `<div class="empty"><span class="empty__icon">${icon.chart}</span><b>The published run list could not be loaded</b><p>Reload to try again. You can still open a results file from your computer.</p></div>`;
@@ -208,7 +209,7 @@
       const s = sens(r), so = obj(r.sensitivity);
       const sub = [KIND[str(r.kind)] || str(r.kind), str(r.model) && str(r.harness), str(r.effort), str(r.prompt) && `prompt ${str(r.prompt)}`].filter(Boolean).join(' · ');
       return `<tr tabindex="0" data-run="${current.runs.indexOf(r)}"${flagged(r) ? ' class="is-flagged"' : ''}>
-        <td class="who"><b>${esc(nameOf(r))}</b><small>${esc(sub)}</small></td>
+        <td class="who"><b>${esc(nameOf(r))}</b><small>${esc(sub)}</small>${str(r.note).trim() ? `<small class="who__note">${esc(str(r.note).trim())}</small>` : ''}</td>
         <td class="score"><div class="meter">${Number.isFinite(s) ? `<span class="meter__band" style="left:0;width:${Math.max(0, Math.min(1, s)) * 100}%"></span><span class="meter__pt" style="left:${Math.max(0, Math.min(1, s)) * 100}%"></span>` : ''}</div></td>
         <td class="num">${pct(s)}</td>
         <td class="num">${pct(num(so.train_classes))}</td>
@@ -243,6 +244,7 @@
     const meta = [KIND[str(r.kind)] || str(r.kind), str(r.harness), str(r.model) && str(r.id) ? `run ${str(r.id)}` : '', str(r.effort), str(r.prompt) && `prompt ${str(r.prompt)}`, SPLIT[splitOf(r)] && splitOf(r) !== 'other' ? `${SPLIT[splitOf(r)].toLowerCase()} split` : '', str(r.date)].filter(Boolean).join(' · ');
     return `<h2 id="drawer-title">${esc(nameOf(r))}</h2>
       <p class="muted">${esc(meta)}</p>
+      ${str(r.note).trim() ? `<p class="muted">${esc(str(r.note).trim())}</p>` : ''}
       <p class="num" style="font-size:1.6rem">${pct(sens(r))} <small>of scored signals found${t ? ` at ${esc(t)}` : ''}</small></p>
       <div class="table-wrap"><table class="table"><thead><tr><th>Signals found</th><th>Fraction</th></tr></thead><tbody>${rows.map(([k, v]) => `<tr><td>${esc(k)}</td><td class="num">${v}</td></tr>`).join('')}</tbody></table></div>
       <div><h3 class="drawer__h">Honest false-alarm rates</h3><p class="muted">${hText}</p></div>
@@ -288,7 +290,7 @@
   const clean = d => {
     const list = Array.isArray(d) ? d : d && typeof d === 'object' ? d.runs : null;
     if (!Array.isArray(list) || !list.every(r => r && typeof r === 'object' && !Array.isArray(r))) return null;
-    return { thr: d && !Array.isArray(d) ? d.far_threshold_hz : null, runs: list };
+    return { thr: d && !Array.isArray(d) ? d.far_threshold_hz : null, status: d && !Array.isArray(d) ? d.status : '', runs: list };
   };
   function openLocal(f) {
     if (!f) return;
@@ -319,7 +321,7 @@
       if (!res.ok) throw new Error(String(res.status));
       const d = clean(await res.json());
       if (!d) throw new Error('shape');
-      published = { thr: d.thr, runs: d.runs.filter(r => r && typeof r === 'object' && !Array.isArray(r)) };
+      published = { thr: d.thr, status: d.status, runs: d.runs.filter(r => r && typeof r === 'object' && !Array.isArray(r)) };
     } catch (_) { failed = true; }
     loaded = true;
     if (!label) show(published, null);

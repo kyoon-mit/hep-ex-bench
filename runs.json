@@ -1,5 +1,6 @@
 {
- "note": "Published runs for the benchmark monitor (https://kyoon-mit.github.io/agentic-ligo/). Only published results go here. far_threshold_hz: the one false-alarm-rate threshold all runs are scored at (null until chosen). Each run: id, display_name (optional; shown instead of model or id), date (YYYY-MM-DD), kind (agent, reference or fake; fake = scorer test lists, shown only under Scorer tests), harness (claude, codex, opencode, vibe or null), model, effort, prompt (null when not an agent), split (train or test), sensitivity {overall, train_classes, heldout_classes (test split only; never broken out by name), by_family {sine_gaussian, white_noise_burst, bbh_circular} or null} (fractions 0 to 1 of scored signals found at far_threshold_hz), snr50 {train_classes, heldout_classes} (combined SNR at which half are found), generalization_gap (train_classes minus heldout_classes), far_honesty {pass, p_value, observed, expected}, faint_check {flagged, found_fraction}, wall_time_s, budget_s, segments [{start_s, end_s, exit}], datasets {n, failed {timeout, oom, crash, rejected, env, missing}}. null = not measured. Sorted by sensitivity.overall; runs whose rates are not honest or that the too-faint check flags go last. No ranking is chosen yet.",
+ "note": "Published runs for the benchmark monitor (https://kyoon-mit.github.io/agentic-ligo/). Only published results go here. status: optional text shown above the board on the Searches tab (for example, a run still in progress). far_threshold_hz: the one false-alarm-rate threshold all runs are scored at (null until chosen). Each run: id, display_name (optional; shown instead of model or id), date (YYYY-MM-DD), kind (agent, reference or fake; fake = scorer test lists, shown only under Scorer tests), harness (claude, codex, opencode, vibe or null), model, effort, prompt (null when not an agent), split (train or test), sensitivity {overall, train_classes, heldout_classes (test split only; never broken out by name), by_family {sine_gaussian, white_noise_burst, bbh_circular} or null} (fractions 0 to 1 of scored signals found at far_threshold_hz), snr50 {train_classes, heldout_classes} (combined SNR at which half are found), generalization_gap (train_classes minus heldout_classes), far_honesty {pass, p_value, observed, expected}, faint_check {flagged, found_fraction}, wall_time_s, budget_s, segments [{start_s, end_s, exit}], datasets {n, failed {timeout, oom, crash, rejected, env, missing}}, note (optional; one line shown under the run's name). null = not measured. Sorted by sensitivity.overall; runs whose rates are not honest or that the too-faint check flags go last. No ranking is chosen yet.",
+ "status": "These three rows come from a pipeline test on one day of training data. The full run of the three frozen toy searches over the whole dataset started on 27 November and is still running; its results will appear here when it finishes.",
  "far_threshold_hz": 1.6534391534391535e-06,
  "runs": [
   {
@@ -36,7 +37,8 @@
     "found_fraction": 0.0
    },
    "wall_time_s": null,
-   "datasets": null
+   "datasets": null,
+   "note": "Pipeline test on one day of training data."
   },
   {
    "id": "toy-cnn-v0",
@@ -72,7 +74,8 @@
     "found_fraction": 0.0
    },
    "wall_time_s": null,
-   "datasets": null
+   "datasets": null,
+   "note": "Pipeline test on one day of training data."
   },
   {
    "id": "toy-ae-v0",
@@ -108,7 +111,8 @@
     "found_fraction": 0.0
    },
    "wall_time_s": null,
-   "datasets": null
+   "datasets": null,
+   "note": "Pipeline test on one day of training data."
   },
   {
    "id": "nothing",
